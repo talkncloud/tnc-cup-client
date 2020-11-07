@@ -1,6 +1,7 @@
 {
-  "name": "@talkncloud/tnc-cup",
-  "version": "1.0.0",
+  "name": "tnc-cup",
+  "description": "this package will process cloudformation templates and post to the talkncloud tnc-cup api",
+  "version": "0.0.1",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -9,6 +10,7 @@
   },
   "author": "talkncloud",
   "license": "ISC",
+  "homepage": "https://github.com/talkncloud/tnc-cup-client",
   "devDependencies": {
     "@tsconfig/recommended": "^1.0.1",
     "@types/node": "^14.14.2",
@@ -24,7 +26,6 @@
     "js-yaml": "^3.14.0",
     "yargs": "^16.1.0"
   },
-  "description": "",
   "bin": {
     "tnc-cup": "./dist/cli.js"
   }
