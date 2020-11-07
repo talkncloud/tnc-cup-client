@@ -21,7 +21,7 @@ tnc-cup -g
 **As package in code**
 
 ```
-const tncCup = require('TOBEUPDATED');
+const tncCup = require('@talkncloud/tnc-cup');
 tncCup.proccessFromConfigFile('./config.json');
 ```
 

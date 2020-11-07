@@ -1,5 +1,5 @@
 {
-  "name": "tnc-cup",
+  "name": "@talkncloud/tnc-cup",
   "description": "this package will process cloudformation templates and post to the talkncloud tnc-cup api",
   "version": "0.0.1",
   "main": "index.js",
