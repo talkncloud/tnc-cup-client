@@ -1,0 +1,17 @@
+{
+  "files": ["cf.json", "cf.yaml"],
+  "directories": ["dir"],
+  "url": {
+    "url": "http://localhost/api",
+    "header": {
+      "x-api-key": ""
+    }
+  },
+  "find": {
+    "include": ["AWS::CDK::Metadata"],
+    "exclude": []
+  },
+  "other": [
+    "key"
+  ]
+}

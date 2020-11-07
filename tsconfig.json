@@ -1,0 +1,10 @@
+{
+    "extends": "@tsconfig/recommended/tsconfig.json",
+    "files": [
+        "./cli.ts",
+        "./index.ts"
+    ],
+    "compilerOptions": {
+        "outDir": "./dist"
+    }
+}

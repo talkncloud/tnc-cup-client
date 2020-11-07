@@ -1,0 +1,17 @@
+{
+  "files": ["cf.json", "cf.yaml"],
+  "directories": ["dir"],
+  "url": {
+    "url": "https://127.0.0.1",
+    "header": {
+      "x-api-key": "talkncloud"
+    }
+  },
+  "find": {
+    "include": ["AWS::CDK::Metadata"],
+    "exclude": []
+  },
+  "other": [
+    "key"
+  ]
+}
