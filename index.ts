@@ -42,8 +42,7 @@ interface Response {
 export function proccess(
     cloudFormationFilePath: string, 
     searchContent: any[], 
-    excludeSearchContent?: any[],
-    additionalContentFromFilePath?: string
+    excludeSearchContent?: any[]
 ) {
     let response: Response = {
         data: [],
