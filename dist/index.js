@@ -1,4 +1,13 @@
 "use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -39,7 +48,7 @@ function find(searchContent, content, excludeSearchContent) {
     return arrayFindResult;
 }
 exports.find = find;
-function proccess(cloudFormationFilePath, searchContent, excludeSearchContent, additionalContentFromFilePath) {
+function proccess(cloudFormationFilePath, searchContent, excludeSearchContent) {
     let response = {
         data: [],
         message: ""
@@ -77,27 +86,35 @@ function proccessDirectory(cloudFormationDirPath, searchContent, excludeSearchCo
 }
 exports.proccessDirectory = proccessDirectory;
 function proccessFromConfigFile(path) {
-    const config = yamlParser(path);
-    if ((config.files === undefined || config.files.length == 0)
-        && (config.directories === undefined || config.directories.length == 0)) {
-        console.log("files or directories required");
-        return [];
-    }
-    if (config.url === undefined && config.url == "") {
-        console.log("url required");
-        return [];
-    }
-    let arrayResult = [];
-    for (let directory of config.directories) {
-        arrayResult.push(...proccessDirectory(directory, config.find.include, config.find.exclude));
-    }
-    for (let file of config.files) {
-        arrayResult.push(...proccess(file, config.find.include, config.find.exlude).data);
-    }
-    axios_1.default.post(config.url.url, arrayResult.concat(config.other), {
-        headers: config.url.header
-    }).then(response => console.log(`Success send to: ${response.config.url}`))
-        .catch(e => console.log(e.message));
-    return arrayResult;
+    return __awaiter(this, void 0, void 0, function* () {
+        const config = yamlParser(path);
+        if ((config.files === undefined || config.files.length == 0)
+            && (config.directories === undefined || config.directories.length == 0)) {
+            console.log("files or directories required");
+            return [];
+        }
+        if (config.url === undefined && config.url == "") {
+            console.log("url required");
+            return [];
+        }
+        let arrayResult = [];
+        for (let directory of config.directories) {
+            arrayResult.push(...proccessDirectory(directory, config.find.include, config.find.exclude));
+        }
+        for (let file of config.files) {
+            arrayResult.push(...proccess(file, config.find.include, config.find.exlude).data);
+        }
+        try {
+            const apiReturn = yield axios_1.default.post(config.url.url, arrayResult.concat(config.other), {
+                headers: config.url.header
+            });
+            console.log(apiReturn);
+            return apiReturn;
+        }
+        catch (e) {
+            console.log(e.message);
+            return e;
+        }
+    });
 }
 exports.proccessFromConfigFile = proccessFromConfigFile;

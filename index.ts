@@ -85,7 +85,7 @@ export function proccessDirectory(
     return arrayDirectoryResult;
 }
 
-export function proccessFromConfigFile(path: string) {
+export async function proccessFromConfigFile(path: string) {
     const config = yamlParser(path);
     if((config.files === undefined || config.files.length == 0) 
         && (config.directories === undefined || config.directories.length == 0)) {
@@ -105,13 +105,18 @@ export function proccessFromConfigFile(path: string) {
     for (let file of config.files) {
         arrayResult.push(...proccess(file, config.find.include, config.find.exlude).data);
     }
-    Axios.post(
-        config.url.url, 
-        arrayResult.concat(config.other), 
-        {
-          headers: config.url.header
-        }
-      ).then(response => console.log(`Success send to: ${response.config.url}`))
-      .catch(e => console.log(e.message));
-    return arrayResult;
+    try {
+        const apiReturn = await Axios.post(
+            config.url.url, 
+            arrayResult.concat(config.other), 
+            {
+              headers: config.url.header
+            }
+          );
+        console.log(apiReturn);
+        return apiReturn;    
+    } catch(e) {
+        console.log(e.message);
+        return e;
+    }
 }
