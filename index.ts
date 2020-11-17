@@ -1,18 +1,21 @@
 import yaml from 'js-yaml';
 import fs from 'fs';
 import Axios from 'axios';
+import { Response } from './models/response';
 
 export function yamlParser(path: string) {
+    console.log(`--> Parse yaml: ${path}`);
     try{
         const content = yaml.load(fs.readFileSync(path).toString());
         return content;    
     } catch(e) {
-        console.log(e);
+        console.error(`yamlParser ${e}`);
         return e;
     }
 }
 
 export function find(searchContent: any[], content: any, excludeSearchContent?: any[]) {
+    console.log(`--> find`);
     let arrayFindResult = [];
     for(let key of Object.keys(content['Resources'])) {
         if(excludeSearchContent !== undefined 
@@ -35,15 +38,12 @@ export function find(searchContent: any[], content: any, excludeSearchContent?: 
 
 }
 
-interface Response { 
-    data: any[], message: string;
-}
-
 export function proccess(
     cloudFormationFilePath: string, 
     searchContent: any[], 
     excludeSearchContent?: any[]
 ) {
+    console.log(`--> proccess ${cloudFormationFilePath}`);
     let response: Response = {
         data: [],
         message: ""
@@ -70,6 +70,7 @@ export function proccessDirectory(
     excludeSearchContent?: any[],
     additionalContentFromFilePath?: string
 ) {
+    console.log(`--> proccessDirectory ${cloudFormationDirPath}`);
     const path = require('path');
     const files = fs.readdirSync(cloudFormationDirPath);
     const arrayDirectoryResult = [];
@@ -86,13 +87,13 @@ export function proccessDirectory(
 }
 
 export async function proccessFromConfigFile(path: string) {
+    console.log(`--> proccessFromConfigFile ${path}`);
     const config = yamlParser(path);
     if((config.files === undefined || config.files.length == 0) 
         && (config.directories === undefined || config.directories.length == 0)) {
         console.log("files or directories required");
         return [];
     }
-
     if(config.url === undefined && config.url == "") {
         console.log("url required");
         return [];
@@ -101,22 +102,25 @@ export async function proccessFromConfigFile(path: string) {
     for (let directory of config.directories) {
         arrayResult.push(...proccessDirectory(directory, config.find.include, config.find.exclude));
     }
-
     for (let file of config.files) {
         arrayResult.push(...proccess(file, config.find.include, config.find.exlude).data);
     }
     try {
+        console.log(`url: ${config.url.url}`);
+        console.log(`header: ${JSON.stringify(config.url.header)}`);
+        console.log(`data: ${JSON.stringify(arrayResult, null, 2)}`);
         const apiReturn = await Axios.post(
             config.url.url, 
-            arrayResult.concat(config.other), 
+            arrayResult, 
             {
               headers: config.url.header
             }
           );
+        
         console.log(apiReturn);
         return apiReturn;    
     } catch(e) {
-        console.log(e.message);
+        console.log(JSON.stringify(e));
         return e;
     }
 }
