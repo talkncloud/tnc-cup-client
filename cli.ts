@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import yargs from 'yargs';
-import { proccess, proccessDirectory, proccessFromConfigFile} from './index';
+import { proccessFromConfigFile} from './index';
 import fs from 'fs';
 
 const argv = yargs(process.argv.slice(2)).options({
