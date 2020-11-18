@@ -1,124 +1,138 @@
-import yaml from 'js-yaml';
+
 import fs from 'fs';
 import Axios from 'axios';
-import { Response } from './models/response';
+import { Response } from './src/models/response';
+import { parseYamlFromPath } from './src/utils/parser';
 
-export function yamlParser(path: string) {
-    console.log(`--> Parse yaml: ${path}`);
-    try{
-        const content = yaml.load(fs.readFileSync(path).toString());
-        return content;    
-    } catch(e) {
-        console.error(`yamlParser ${e}`);
-        return e;
-    }
-}
-
-export function find(searchContent: any[], content: any, excludeSearchContent?: any[]) {
-    console.log(`--> find`);
+function find(content: any, includeSearchContent: any[], excludeSearchContent?: any[], availableServices?: any[]) {
+    console.log(`find`);
     let arrayFindResult = [];
     for(let key of Object.keys(content['Resources'])) {
+        const service = content['Resources'][key]['Type'];
         if(excludeSearchContent !== undefined 
             && excludeSearchContent.length > 0 
-            && excludeSearchContent.includes(content['Resources'][key]['Type'])) {
+            && excludeSearchContent.includes(service)) {
             continue;
         }
 
-        if(searchContent === undefined
-            || searchContent.length == 0
-            || (searchContent !== undefined
-                && searchContent.length > 0 
-                && searchContent.includes(content['Resources'][key]['Type']))) {
-            arrayFindResult.push({
-                [key]: content['Resources'][key]
-            });
+        if (availableServices === undefined || availableServices === null) {
+            continue;
+        } else {
+            if(availableServices.includes(service) &&
+               (includeSearchContent === undefined
+                   || includeSearchContent.length == 0
+                   || (includeSearchContent !== undefined
+                       && includeSearchContent.length > 0 
+                       && includeSearchContent.includes(service)))) {
+                arrayFindResult.push({
+                    [key]: content['Resources'][key]
+                });
+            }
         }
     }
     return arrayFindResult;
-
 }
 
-export function proccess(
+function proccessFile(
     cloudFormationFilePath: string, 
-    searchContent: any[], 
-    excludeSearchContent?: any[]
+    includeSearchContent: any[], 
+    excludeSearchContent?: any[],
+    availableServices?: any[]
 ) {
-    console.log(`--> proccess ${cloudFormationFilePath}`);
+    console.log(`proccess ${cloudFormationFilePath}`);
     let response: Response = {
         data: [],
         message: ""
     };
     try {
-        const cloudFormationContent = yamlParser(cloudFormationFilePath);
-        const findResult = find(searchContent, cloudFormationContent, excludeSearchContent);
+        const cloudFormationContent = parseYamlFromPath(cloudFormationFilePath);
+        const findResult = find(cloudFormationContent, includeSearchContent, excludeSearchContent, availableServices);
         console.log(`Parse file: ${cloudFormationFilePath}`);
         if (findResult.length > 0) {
             response.data.push(...findResult);
         }
     } catch (e) {
-        console.log(e);
+        console.log(`Process with error ${e.message}`);
         response.message = "Not valid json or yaml file"
         throw response;
     }
     return response;
 }
 
-
-export function proccessDirectory(
+function proccessDirectory(
     cloudFormationDirPath: string, 
-    searchContent: any[], 
+    includeSearchContent: any[], 
     excludeSearchContent?: any[],
+    availableServices?: any[],
     additionalContentFromFilePath?: string
 ) {
-    console.log(`--> proccessDirectory ${cloudFormationDirPath}`);
+    console.log(`proccessDirectory ${cloudFormationDirPath}`);
     const path = require('path');
     const files = fs.readdirSync(cloudFormationDirPath);
     const arrayDirectoryResult = [];
     for (let file of files) {
         try {
-            const findResult = proccess(path.join(cloudFormationDirPath, file), searchContent, excludeSearchContent);
+            const findResult = proccessFile(path.join(cloudFormationDirPath, file), includeSearchContent, excludeSearchContent, availableServices);
             arrayDirectoryResult.push(...findResult.data);
         }
         catch (e) {
-            console.log(e.message);
+            console.log(`Process Dir with error ${e.message}`);
         }
     }
     return arrayDirectoryResult;
 }
 
 export async function proccessFromConfigFile(path: string) {
-    console.log(`--> proccessFromConfigFile ${path}`);
-    const config = yamlParser(path);
-    if((config.files === undefined || config.files.length == 0) 
-        && (config.directories === undefined || config.directories.length == 0)) {
-        console.log("files or directories required");
-        return [];
-    }
-    if(config.url === undefined && config.url == "") {
-        console.log("url required");
-        return [];
-    }
-    let arrayResult = [];
-    for (let directory of config.directories) {
-        arrayResult.push(...proccessDirectory(directory, config.find.include, config.find.exclude));
-    }
-    for (let file of config.files) {
-        arrayResult.push(...proccess(file, config.find.include, config.find.exlude).data);
-    }
+    console.log(`proccessFromConfigFile ${path}`);
+
     try {
-        console.log(`url: ${config.url.url}`);
-        console.log(`header: ${JSON.stringify(config.url.header)}`);
-        console.log(`data: ${JSON.stringify(arrayResult, null, 2)}`);
-        const apiReturn = await Axios.post(
-            config.url.url, 
-            arrayResult, 
-            {
-              headers: config.url.header
-            }
-          );
+        const config = parseYamlFromPath(path);
+
+        if((config.files === undefined || config.files.length == 0) 
+            && (config.directories === undefined || config.directories.length == 0)) {
+            console.log("files or directories required");
+            return [];
+        }
+
+        if(config.url === undefined && config.url == "") {
+            console.log("url required");
+            return [];
+        }
+        const baseUrl = `${config.api.baseUrl}/${config.api.version}`;
+        const availableServices = await Axios.get(`${baseUrl}/${config.api.servicesEndpoint}`, {
+            headers: config.api.header
+          });
+        const services: any[] = Object.keys(availableServices.data);
+        console.log(`Available Services: ${JSON.stringify(services)}`);
+
+        let arrayResult = [];
+        for (let directory of config.directories) {
+            arrayResult.push(...proccessDirectory(directory, config.find.include, config.find.exclude, services));
+        }
+
+        for (let file of config.files) {
+            arrayResult.push(...proccessFile(file, config.find.include, config.find.exlude, services).data);
+        }
+
+        if (availableServices && availableServices.data) {
+            console.log(`url: ${baseUrl}/${config.api.templateEndpoint}`);
+            console.log(`header: ${JSON.stringify(config.api.header)}`);
+            console.log(`data: ${JSON.stringify(arrayResult, null, 2)}`);
+    
+            const apiReturn = await Axios.post(
+                `${baseUrl}/${config.api.templateEndpoint}`, 
+                arrayResult, 
+                {
+                  headers: config.api.header
+                }
+              );
+            
+            console.log(apiReturn);
+            return apiReturn;    
+        } else {
+            return [];
+        }
         
-        console.log(apiReturn);
-        return apiReturn;    
     } catch(e) {
         console.log(JSON.stringify(e));
         return e;

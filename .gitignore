@@ -2,3 +2,7 @@
 node_modules/*
 testfiles/*
 dist/
+config.tien.json
+sample-data/
+.vscode/*
+package-lock.json
