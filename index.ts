@@ -2,7 +2,10 @@
 import fs from 'fs';
 import Axios from 'axios';
 import { Response } from './src/models/response';
+import { Service } from './src/models/service-content';
 import { parseYamlFromPath } from './src/utils/parser';
+import { isService } from './src/utils/type';
+import Table from "cli-table3"
 
 function find(content: any, includeSearchContent: any[], excludeSearchContent?: any[], availableServices?: any[]) {
     console.log(`find`);
@@ -103,7 +106,7 @@ export async function proccessFromConfigFile(path: string) {
             headers: config.api.header
           });
         const services: any[] = Object.keys(availableServices.data);
-        console.log(`Available Services: ${JSON.stringify(services)}`);
+        // console.log(`Available Services: ${JSON.stringify(services)}`);
 
         let arrayResult = [];
         for (let directory of config.directories) {
@@ -117,7 +120,7 @@ export async function proccessFromConfigFile(path: string) {
         if (availableServices && availableServices.data) {
             console.log(`url: ${baseUrl}/${config.api.templateEndpoint}`);
             console.log(`header: ${JSON.stringify(config.api.header)}`);
-            console.log(`data: ${JSON.stringify(arrayResult, null, 2)}`);
+            // console.log(`data: ${JSON.stringify(arrayResult, null, 2)}`);
     
             const apiReturn = await Axios.post(
                 `${baseUrl}/${config.api.templateEndpoint}`, 
@@ -127,14 +130,73 @@ export async function proccessFromConfigFile(path: string) {
                 }
               );
             
-            console.log(apiReturn);
+            console.log(`${JSON.stringify(apiReturn.data, null, 2)}`);
+            
+            const table = new Table({
+                head: ["Service", "Group", "Description", "Price"],
+                colWidths: [15, 15, 90, 15],
+                wordWrap: true,
+                chars: { 'top': '═' , 'top-mid': '╤' , 'top-left': '╔' , 'top-right': '╗'
+                , 'bottom': '═' , 'bottom-mid': '╧' , 'bottom-left': '╚' , 'bottom-right': '╝'
+                , 'left': '║' , 'left-mid': '╟' , 'mid': '─' , 'mid-mid': '┼'
+                , 'right': '║' , 'right-mid': '╢' , 'middle': '│' }
+            })
+
+            const a: any[] = [];
+            apiReturn.data.forEach((e: any | Service) => {
+                console.log(`e --> ${JSON.stringify(e)}`);
+                let group = '';
+                let service = '';
+                let description = '';
+                let price = '';
+                let isGroup = false;
+                for (var item in e) {
+                    console.log(`Single Service: --> ${item}`);
+                    for (var key in e[item]) {
+                        console.log(`key: --> ${key}`);
+                        if (key.match(/description|price/)) {
+                            service = item;
+                            if (key === 'description') description = e[item][key];
+                            if (key === 'price') price = e[item][key];
+                            isGroup = false;
+                        } else {
+                            isGroup = true;
+                            continue;
+                        }
+                    }
+                    if (!isGroup) {
+                        console.log(`push: --> ${group} ${service} ${description} ${price}`);
+                        table.push([service, group, description, `${price}`]);
+                    } else {
+                        group = item;
+                        console.log(`Group Service: --> ${item}`);
+                        for (var subItem in e[item]) {
+                            console.log(`single service key: --> ${subItem}`);
+                            service = subItem;
+                            for (var key in e[item][subItem]) {
+                                console.log(`subItem key key: --> ${key}`);
+                                if (key.match(/description|price/)) {
+                                    if (key === 'description') description = e[item][subItem][key];
+                                    if (key === 'price') price = e[item][subItem][key];
+                                }
+                            }
+                            console.log(`push: --> ${group} ${service} ${description} ${price}`);
+                            table.push([service, group, description, `${price}`]);
+                        }
+                    }
+                }
+                
+                a.push(e);
+            });
+            console.log(table.toString());
+
             return apiReturn;    
         } else {
             return [];
         }
         
     } catch(e) {
-        console.log(JSON.stringify(e));
+        console.log(`proccessFromConfigFile ${JSON.stringify(e.stack, null, 2)}`);
         return e;
     }
 }
