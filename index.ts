@@ -6,6 +6,7 @@ import { Service } from './src/models/service-content';
 import { parseYamlFromPath } from './src/utils/parser';
 import { isService } from './src/utils/type';
 import Table from "cli-table3"
+import colors from "colors";
 
 function find(content: any, includeSearchContent: any[], excludeSearchContent?: any[], availableServices?: any[]) {
     console.log(`find`);
@@ -133,7 +134,7 @@ export async function proccessFromConfigFile(path: string) {
             console.log(`${JSON.stringify(apiReturn.data, null, 2)}`);
             
             const table = new Table({
-                head: ["Service", "Group", "Description", "Price"],
+                head: [colors.white("Service"), colors.white("Group"), colors.white("Description"), colors.white("Price")],
                 colWidths: [15, 15, 90, 10],
                 wordWrap: true,
                 chars: { 'top': '═' , 'top-mid': '╤' , 'top-left': '╔' , 'top-right': '╗'
@@ -169,9 +170,9 @@ export async function proccessFromConfigFile(path: string) {
                         console.log(`push: --> ${group} ${service} ${description} ${price}`);
                         // Align description right if TOTAL
                         if (item.includes('TOTAL ')) {
-                            table.push([service, group, { hAlign: 'right', content: description }, {hAlign: 'right', content: '$' + `${price}`}]);
+                            table.push([colors.yellow(service), colors.yellow(group), { hAlign: 'right', content: colors.yellow(description) }, {hAlign: 'right', content: colors.yellow('$' + `${price}`)}]);
                         } else {
-                            table.push([service, group, description, {hAlign: 'right', content: '$' + `${price}`}]);
+                            table.push([colors.green(service), colors.green(group), colors.green(description), {hAlign: 'right', content: colors.green('$' + `${price}`)}]);
                         }
                     } else {
                         group = item;
@@ -187,7 +188,7 @@ export async function proccessFromConfigFile(path: string) {
                                 }
                             }
                             console.log(`push: --> ${group} ${service} ${description} ${price}`);
-                            table.push([service, group, description, {hAlign: 'right', content: '$' + `${price}`}]);
+                            table.push([colors.green(service), colors.green(group), colors.green(description), {hAlign: 'right', content: colors.green('$' + `${price}`)}]);
                         }
                     }
                 }
