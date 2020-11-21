@@ -134,7 +134,7 @@ export async function proccessFromConfigFile(path: string) {
             
             const table = new Table({
                 head: ["Service", "Group", "Description", "Price"],
-                colWidths: [15, 15, 90, 15],
+                colWidths: [15, 15, 90, 10],
                 wordWrap: true,
                 chars: { 'top': '═' , 'top-mid': '╤' , 'top-left': '╔' , 'top-right': '╗'
                 , 'bottom': '═' , 'bottom-mid': '╧' , 'bottom-left': '╚' , 'bottom-right': '╝'
@@ -159,14 +159,20 @@ export async function proccessFromConfigFile(path: string) {
                             if (key === 'description') description = e[item][key];
                             if (key === 'price') price = e[item][key];
                             isGroup = false;
-                        } else {
+                        }
+                        else {
                             isGroup = true;
                             continue;
                         }
                     }
                     if (!isGroup) {
                         console.log(`push: --> ${group} ${service} ${description} ${price}`);
-                        table.push([service, group, description, `${price}`]);
+                        // Align description right if TOTAL
+                        if (item.includes('TOTAL ')) {
+                            table.push([service, group, { hAlign: 'right', content: description }, {hAlign: 'right', content: '$' + `${price}`}]);
+                        } else {
+                            table.push([service, group, description, {hAlign: 'right', content: '$' + `${price}`}]);
+                        }
                     } else {
                         group = item;
                         console.log(`Group Service: --> ${item}`);
@@ -181,7 +187,7 @@ export async function proccessFromConfigFile(path: string) {
                                 }
                             }
                             console.log(`push: --> ${group} ${service} ${description} ${price}`);
-                            table.push([service, group, description, `${price}`]);
+                            table.push([service, group, description, {hAlign: 'right', content: '$' + `${price}`}]);
                         }
                     }
                 }
