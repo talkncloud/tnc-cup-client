@@ -1,5 +1,7 @@
 import yaml from 'js-yaml';
 import fs from 'fs';
+import { Currency } from '../models/currency';
+import { TemplateBody } from '../models/template-body';
 
 const parseYamlFromPath = (path: string) => {
   console.log(`Parse yaml from path: ${path}`);
@@ -12,4 +14,15 @@ const parseYamlFromPath = (path: string) => {
   }
 }
 
-export { parseYamlFromPath }
+const constructTemplateBodyApi = (orgBody: any[], currency: Currency) => {
+  const a: TemplateBody[] = [];
+  const body: TemplateBody = { 
+    file: orgBody,
+    currency
+  };
+  a.push(body);
+  return JSON.stringify(a);
+
+}
+
+export { parseYamlFromPath, constructTemplateBodyApi }
