@@ -3,10 +3,10 @@ import fs from 'fs';
 import Axios from 'axios';
 import { Response } from './src/models/response';
 import { Service } from './src/models/service-content';
-import { parseYamlFromPath } from './src/utils/parser';
-import { isService } from './src/utils/type';
+import { parseYamlFromPath, constructTemplateBodyApi } from './src/utils/parser';
 import Table from "cli-table3"
 import colors from "colors";
+import { Currency } from './src/models/currency';
 
 function find(content: any, includeSearchContent: any[], excludeSearchContent?: any[], availableServices?: any[]) {
     console.log(`find`);
@@ -118,20 +118,23 @@ export async function proccessFromConfigFile(path: string) {
             arrayResult.push(...proccessFile(file, config.find.include, config.find.exlude, services).data);
         }
 
+
         if (availableServices && availableServices.data) {
+            const c: Currency = {code:`${config.currency}`};
             console.log(`url: ${baseUrl}/${config.api.templateEndpoint}`);
             console.log(`header: ${JSON.stringify(config.api.header)}`);
+            console.log(`body: ${constructTemplateBodyApi(arrayResult, c)}`);
             // console.log(`data: ${JSON.stringify(arrayResult, null, 2)}`);
-    
+
             const apiReturn = await Axios.post(
                 `${baseUrl}/${config.api.templateEndpoint}`, 
-                arrayResult, 
+                constructTemplateBodyApi(arrayResult, c), 
                 {
                   headers: config.api.header
                 }
               );
             
-            console.log(`${JSON.stringify(apiReturn.data, null, 2)}`);
+            // console.log(`returned data: ${JSON.stringify(apiReturn.data, null, 2)}`);
             
             const table = new Table({
                 head: [colors.white("Service"), colors.white("Group"), colors.white("Description"), colors.white("Price")],
@@ -145,16 +148,16 @@ export async function proccessFromConfigFile(path: string) {
 
             const a: any[] = [];
             apiReturn.data.forEach((e: any | Service) => {
-                console.log(`e --> ${JSON.stringify(e)}`);
+                // console.log(`e --> ${JSON.stringify(e)}`);
                 let group = '';
                 let service = '';
                 let description = '';
                 let price = '';
                 let isGroup = false;
                 for (var item in e) {
-                    console.log(`Single Service: --> ${item}`);
+                    // console.log(`Single Service: --> ${item}`);
                     for (var key in e[item]) {
-                        console.log(`key: --> ${key}`);
+                        // console.log(`key: --> ${key}`);
                         if (key.match(/description|price/)) {
                             service = item;
                             if (key === 'description') description = e[item][key];
@@ -167,7 +170,7 @@ export async function proccessFromConfigFile(path: string) {
                         }
                     }
                     if (!isGroup) {
-                        console.log(`push: --> ${group} ${service} ${description} ${price}`);
+                        // console.log(`push: --> ${group} ${service} ${description} ${price}`);
                         // Align description right if TOTAL
                         if (item.includes('TOTAL ')) {
                             table.push([colors.yellow(service), colors.yellow(group), { hAlign: 'right', content: colors.yellow(description) }, {hAlign: 'right', content: colors.yellow('$' + `${price}`)}]);
@@ -176,18 +179,18 @@ export async function proccessFromConfigFile(path: string) {
                         }
                     } else {
                         group = item;
-                        console.log(`Group Service: --> ${item}`);
+                        // console.log(`Group Service: --> ${item}`);
                         for (var subItem in e[item]) {
-                            console.log(`single service key: --> ${subItem}`);
+                            // console.log(`single service key: --> ${subItem}`);
                             service = subItem;
                             for (var key in e[item][subItem]) {
-                                console.log(`subItem key key: --> ${key}`);
+                                // console.log(`subItem key key: --> ${key}`);
                                 if (key.match(/description|price/)) {
                                     if (key === 'description') description = e[item][subItem][key];
                                     if (key === 'price') price = e[item][subItem][key];
                                 }
                             }
-                            console.log(`push: --> ${group} ${service} ${description} ${price}`);
+                            // console.log(`push: --> ${group} ${service} ${description} ${price}`);
                             table.push([colors.green(service), colors.green(group), colors.green(description), {hAlign: 'right', content: colors.green('$' + `${price}`)}]);
                         }
                     }
