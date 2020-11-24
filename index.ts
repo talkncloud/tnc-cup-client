@@ -1,4 +1,3 @@
-
 import fs from 'fs';
 import Axios from 'axios';
 import { Response } from './src/models/response';
@@ -7,6 +6,7 @@ import { parseYamlFromPath, constructTemplateBodyApi } from './src/utils/parser'
 import Table from "cli-table3"
 import colors from "colors";
 import { Currency } from './src/models/currency';
+const homedir = require('os').homedir();
 
 function find(content: any, includeSearchContent: any[], excludeSearchContent?: any[], availableServices?: any[]) {
     console.log(`find`);
@@ -86,17 +86,16 @@ function proccessDirectory(
     return arrayDirectoryResult;
 }
 
-export async function proccessFromConfigFile(path: string) {
-    console.log(`proccessFromConfigFile ${path}`);
-
+export async function proccessFromConfigFile(filePath: string) {
+    console.log(`proccessFromConfigFile ${filePath}`);
     try {
-        const config = parseYamlFromPath(path);
+        const config = parseYamlFromPath(`${homedir}/.tnc-cup.config.json`);
 
-        if((config.files === undefined || config.files.length == 0) 
+        /*if((config.files === undefined || config.files.length == 0) 
             && (config.directories === undefined || config.directories.length == 0)) {
             console.log("files or directories required");
             return [];
-        }
+        }*/
 
         if(config.url === undefined && config.url == "") {
             console.log("url required");
@@ -110,13 +109,14 @@ export async function proccessFromConfigFile(path: string) {
         // console.log(`Available Services: ${JSON.stringify(services)}`);
 
         let arrayResult = [];
-        for (let directory of config.directories) {
+        arrayResult.push(...proccessFile(filePath, config.find.include, config.find.exclude, services).data);
+        /*for (let directory of config.directories) {
             arrayResult.push(...proccessDirectory(directory, config.find.include, config.find.exclude, services));
         }
 
         for (let file of config.files) {
             arrayResult.push(...proccessFile(file, config.find.include, config.find.exlude, services).data);
-        }
+        }*/
 
 
         if (availableServices && availableServices.data) {
