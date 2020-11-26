@@ -1,21 +1,30 @@
 #!/usr/bin/env node
 import yargs from 'yargs';
 import { proccessFromConfigFile} from './index';
+import { isFileExist } from './src/utils/file';
 import fs from 'fs';
+import { exit } from 'process';
 
 const argv = yargs(process.argv.slice(2)).options({
   r: { type: 'boolean', default: false },
   g: { type: 'boolean', default: false},
 }).argv;
 
+// console.log(`--> ${process.argv.slice(2)}`);
+// console.log(`--> ${JSON.stringify(argv)}`);
+
 let arrayResult: any[] = [];
-if (argv._[0]) {
-  proccessFromConfigFile(argv._[0]).then(result => {
-    arrayResult.push(result);
-  }).catch(error => {
-    console.log(`proccessFromConfigFile argv returns error ${error.stack}`);
-  });
-  console.log('OK');
+if (argv.t) {
+  if (isFileExist(argv.t as string)) {
+    proccessFromConfigFile(argv.t as string).then(result => {
+      arrayResult.push(result);
+    }).catch(error => {
+      console.log(`proccessFromConfigFile argv returns error ${error.stack}`);
+    });
+  } else {
+    console.error(`File not found!`);
+    exit(2);
+  }
 } else {
   if (argv.g) {
     const path = require('path');
@@ -30,13 +39,4 @@ if (argv._[0]) {
     });
 
   }
-  // if (argv.r) {
-  //   arrayResult = proccessDirectory(argv._[0], [argv._[1]]);
-  // } else {
-  //   try {
-  //       arrayResult = proccess(argv._[0], [argv._[1]]).data;
-  //   } catch (e) {
-  //       console.log(e.message);
-  //   }
-  // }
 }
