@@ -14,11 +14,12 @@ const parseYamlFromPath = (path: string) => {
   }
 }
 
-const constructTemplateBodyApi = (orgBody: any[], currency: Currency) => {
+const constructTemplateBodyApi = (orgBody: any[], currency: Currency, budget: number) => {
   const a: TemplateBody[] = [];
   const body: TemplateBody = { 
     file: orgBody,
-    currency
+    currency,
+    budget
   };
   a.push(body);
   return JSON.stringify(a);

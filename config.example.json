@@ -17,5 +17,6 @@
   "other": [
     "key"
   ],
-  "currency":"USD"
+  "currency":"USD",
+  "budget": 50.00
 }
