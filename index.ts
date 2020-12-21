@@ -2,10 +2,13 @@ import fs from 'fs';
 import Axios from 'axios';
 import { Response } from './src/models/response';
 import { Service } from './src/models/service-content';
+import { BudgetStatus } from './src/models/budget-status';
+import { BudgetResponse } from './src/models/budget-response';
 import { parseYamlFromPath, constructTemplateBodyApi } from './src/utils/parser';
 import Table from "cli-table3"
 import colors from "colors";
 import { Currency } from './src/models/currency';
+import { exit } from 'process';
 const homedir = require('os').homedir();
 
 function find(content: any, includeSearchContent: any[], excludeSearchContent?: any[], availableServices?: any[]) {
@@ -134,7 +137,7 @@ export async function proccessFromConfigFile(filePath: string) {
                 }
               );
             
-            // console.log(`returned data: ${JSON.stringify(apiReturn.data, null, 2)}`);
+            console.log(`returned data: ${JSON.stringify(apiReturn.data, null, 2)}`);
             
             const table = new Table({
                 head: [colors.white("Service"), colors.white("Group"), colors.white("Description"), colors.white("Price")],
@@ -147,6 +150,7 @@ export async function proccessFromConfigFile(filePath: string) {
             })
 
             const a: any[] = [];
+            let budgetResponse: BudgetResponse | null = null;
             apiReturn.data.forEach((e: any | Service) => {
                 // console.log(`e --> ${JSON.stringify(e)}`);
                 let group = '';
@@ -180,18 +184,23 @@ export async function proccessFromConfigFile(filePath: string) {
                     } else {
                         group = item;
                         // console.log(`Group Service: --> ${item}`);
-                        for (var subItem in e[item]) {
-                            // console.log(`single service key: --> ${subItem}`);
-                            service = subItem;
-                            for (var key in e[item][subItem]) {
-                                // console.log(`subItem key key: --> ${key}`);
-                                if (key.match(/description|price/)) {
-                                    if (key === 'description') description = e[item][subItem][key];
-                                    if (key === 'price') price = e[item][subItem][key];
+
+                        if (item.toLowerCase().includes('budget')) {
+                            budgetResponse = e[item];
+                        } else {
+                            for (var subItem in e[item]) {
+                                // console.log(`single service key: --> ${subItem}`);
+                                service = subItem;
+                                for (var key in e[item][subItem]) {
+                                    // console.log(`subItem key key: --> ${key}`);
+                                    if (key.match(/description|price/)) {
+                                        if (key === 'description') description = e[item][subItem][key];
+                                        if (key === 'price') price = e[item][subItem][key];
+                                    }
                                 }
+                                // console.log(`push: --> ${group} ${service} ${description} ${price}`);
+                                table.push([colors.green(service), colors.green(group), colors.green(description), {hAlign: 'right', content: colors.green('$' + `${price}`)}]);
                             }
-                            // console.log(`push: --> ${group} ${service} ${description} ${price}`);
-                            table.push([colors.green(service), colors.green(group), colors.green(description), {hAlign: 'right', content: colors.green('$' + `${price}`)}]);
                         }
                     }
                 }
@@ -199,6 +208,20 @@ export async function proccessFromConfigFile(filePath: string) {
                 a.push(e);
             });
             console.log(table.toString());
+
+            if (budgetResponse !== null) {
+                switch ((budgetResponse as BudgetResponse).status) {
+                    case BudgetStatus.NORMAL:
+                        console.log( `\x1b[32mBudget: ${(budgetResponse as BudgetResponse).message}`);
+                        break;
+                    case BudgetStatus.WARNING:
+                        console.log( `\x1b[33mBudget: ${(budgetResponse as BudgetResponse).message}`);
+                        break;
+                    case BudgetStatus.ERROR:
+                        console.log( `\x1b[31mBudget: ${(budgetResponse as BudgetResponse).message}`);
+                        exit(2);
+                }
+            }
 
             return apiReturn;    
         } else {
