@@ -2,8 +2,8 @@
   "files": ["your_template_files"],
   "directories": ["your_directories"],
   "api": {
-    "baseUrl": "https://wm6lqfe3hg.execute-api.ap-southeast-2.amazonaws.com",
-    "version": "v1",
+    "baseUrl": "https://cup.talkncloud.com",
+    "version": "client",
     "header": {
       "x-api-key": "your_api_key"
     },
