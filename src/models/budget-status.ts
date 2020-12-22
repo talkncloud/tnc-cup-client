@@ -4,4 +4,4 @@ enum BudgetStatus {
     ERROR
 }
 
-export {BudgetStatus};
+export { BudgetStatus };

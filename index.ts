@@ -14,10 +14,10 @@ const homedir = require('os').homedir();
 function find(content: any, includeSearchContent: any[], excludeSearchContent?: any[], availableServices?: any[]) {
     console.log(`find`);
     let arrayFindResult = [];
-    for(let key of Object.keys(content['Resources'])) {
+    for (let key of Object.keys(content['Resources'])) {
         const service = content['Resources'][key]['Type'];
-        if(excludeSearchContent !== undefined 
-            && excludeSearchContent.length > 0 
+        if (excludeSearchContent !== undefined
+            && excludeSearchContent.length > 0
             && excludeSearchContent.includes(service)) {
             continue;
         }
@@ -25,12 +25,12 @@ function find(content: any, includeSearchContent: any[], excludeSearchContent?: 
         if (availableServices === undefined || availableServices === null) {
             continue;
         } else {
-            if(availableServices.includes(service) &&
-               (includeSearchContent === undefined
-                   || includeSearchContent.length == 0
-                   || (includeSearchContent !== undefined
-                       && includeSearchContent.length > 0 
-                       && includeSearchContent.includes(service)))) {
+            if (availableServices.includes(service) &&
+                (includeSearchContent === undefined
+                    || includeSearchContent.length == 0
+                    || (includeSearchContent !== undefined
+                        && includeSearchContent.length > 0
+                        && includeSearchContent.includes(service)))) {
                 arrayFindResult.push({
                     [key]: content['Resources'][key]
                 });
@@ -41,8 +41,8 @@ function find(content: any, includeSearchContent: any[], excludeSearchContent?: 
 }
 
 function proccessFile(
-    cloudFormationFilePath: string, 
-    includeSearchContent: any[], 
+    cloudFormationFilePath: string,
+    includeSearchContent: any[],
     excludeSearchContent?: any[],
     availableServices?: any[]
 ) {
@@ -67,8 +67,8 @@ function proccessFile(
 }
 
 function proccessDirectory(
-    cloudFormationDirPath: string, 
-    includeSearchContent: any[], 
+    cloudFormationDirPath: string,
+    includeSearchContent: any[],
     excludeSearchContent?: any[],
     availableServices?: any[],
     additionalContentFromFilePath?: string
@@ -100,14 +100,14 @@ export async function proccessFromConfigFile(filePath: string) {
             return [];
         }*/
 
-        if(config.url === undefined && config.url == "") {
+        if (config.url === undefined && config.url == "") {
             console.log("url required");
             return [];
         }
         const baseUrl = `${config.api.baseUrl}/${config.api.version}`;
         const availableServices = await Axios.get(`${baseUrl}/${config.api.servicesEndpoint}`, {
             headers: config.api.header
-          });
+        });
         const services: any[] = Object.keys(availableServices.data);
         // console.log(`Available Services: ${JSON.stringify(services)}`);
 
@@ -123,30 +123,32 @@ export async function proccessFromConfigFile(filePath: string) {
 
 
         if (availableServices && availableServices.data) {
-            const c: Currency = {code:`${config.currency}`};
+            const c: Currency = { code: `${config.currency}` };
             console.log(`url: ${baseUrl}/${config.api.templateEndpoint}`);
             console.log(`header: ${JSON.stringify(config.api.header)}`);
             console.log(`body: ${constructTemplateBodyApi(arrayResult, c, config.budget)}`);
             // console.log(`data: ${JSON.stringify(arrayResult, null, 2)}`);
 
             const apiReturn = await Axios.post(
-                `${baseUrl}/${config.api.templateEndpoint}`, 
-                constructTemplateBodyApi(arrayResult, c, config.budget), 
+                `${baseUrl}/${config.api.templateEndpoint}`,
+                constructTemplateBodyApi(arrayResult, c, config.budget),
                 {
-                  headers: config.api.header
+                    headers: config.api.header
                 }
-              );
-            
+            );
+
             console.log(`returned data: ${JSON.stringify(apiReturn.data, null, 2)}`);
-            
+
             const table = new Table({
                 head: [colors.white("Service"), colors.white("Group"), colors.white("Description"), colors.white("Price")],
                 colWidths: [15, 15, 90, 10],
                 wordWrap: true,
-                chars: { 'top': '═' , 'top-mid': '╤' , 'top-left': '╔' , 'top-right': '╗'
-                , 'bottom': '═' , 'bottom-mid': '╧' , 'bottom-left': '╚' , 'bottom-right': '╝'
-                , 'left': '║' , 'left-mid': '╟' , 'mid': '─' , 'mid-mid': '┼'
-                , 'right': '║' , 'right-mid': '╢' , 'middle': '│' }
+                chars: {
+                    'top': '═', 'top-mid': '╤', 'top-left': '╔', 'top-right': '╗'
+                    , 'bottom': '═', 'bottom-mid': '╧', 'bottom-left': '╚', 'bottom-right': '╝'
+                    , 'left': '║', 'left-mid': '╟', 'mid': '─', 'mid-mid': '┼'
+                    , 'right': '║', 'right-mid': '╢', 'middle': '│'
+                }
             })
 
             const a: any[] = [];
@@ -177,9 +179,9 @@ export async function proccessFromConfigFile(filePath: string) {
                         // console.log(`push: --> ${group} ${service} ${description} ${price}`);
                         // Align description right if TOTAL
                         if (item.includes('TOTAL ')) {
-                            table.push([colors.yellow(service), colors.yellow(group), { hAlign: 'right', content: colors.yellow(description) }, {hAlign: 'right', content: colors.yellow('$' + `${price}`)}]);
+                            table.push([colors.yellow(service), colors.yellow(group), { hAlign: 'right', content: colors.yellow(description) }, { hAlign: 'right', content: colors.yellow('$' + `${price}`) }]);
                         } else {
-                            table.push([colors.green(service), colors.green(group), colors.green(description), {hAlign: 'right', content: colors.green('$' + `${price}`)}]);
+                            table.push([colors.green(service), colors.green(group), colors.green(description), { hAlign: 'right', content: colors.green('$' + `${price}`) }]);
                         }
                     } else {
                         group = item;
@@ -199,12 +201,12 @@ export async function proccessFromConfigFile(filePath: string) {
                                     }
                                 }
                                 // console.log(`push: --> ${group} ${service} ${description} ${price}`);
-                                table.push([colors.green(service), colors.green(group), colors.green(description), {hAlign: 'right', content: colors.green('$' + `${price}`)}]);
+                                table.push([colors.green(service), colors.green(group), colors.green(description), { hAlign: 'right', content: colors.green('$' + `${price}`) }]);
                             }
                         }
                     }
                 }
-                
+
                 a.push(e);
             });
             console.log(table.toString());
@@ -212,23 +214,26 @@ export async function proccessFromConfigFile(filePath: string) {
             if (budgetResponse !== null) {
                 switch ((budgetResponse as BudgetResponse).status) {
                     case BudgetStatus.NORMAL:
-                        console.log( `\x1b[32mBudget: ${(budgetResponse as BudgetResponse).message}`);
+                        console.log(`\n\x1b[32mBudget: ${(budgetResponse as BudgetResponse).message}`);
                         break;
                     case BudgetStatus.WARNING:
-                        console.log( `\x1b[33mBudget: ${(budgetResponse as BudgetResponse).message}`);
+                        console.log(`\n\x1b[33mBudget: ${(budgetResponse as BudgetResponse).message}`);
                         break;
                     case BudgetStatus.ERROR:
-                        console.log( `\x1b[31mBudget: ${(budgetResponse as BudgetResponse).message}`);
-                        exit(2);
+                        console.log(`\n\x1b[31mBudget: ${(budgetResponse as BudgetResponse).message}`);
+                        break;
+                    default:
+                        console.log(`\n\x1b[33mBudget: Unknown message.`);
+                        break;
                 }
             }
 
-            return apiReturn;    
+            return apiReturn;
         } else {
             return [];
         }
-        
-    } catch(e) {
+
+    } catch (e) {
         console.log(`proccessFromConfigFile ${JSON.stringify(e.stack, null, 2)}`);
         return e;
     }

@@ -1,22 +1,28 @@
 {
-  "files": ["your_template_files"],
-  "directories": ["your_directories"],
+  "files": [
+    "your_template_files"
+  ],
+  "directories": [
+    "your_directories"
+  ],
   "api": {
     "baseUrl": "https://cup.talkncloud.com",
     "version": "client",
     "header": {
       "x-api-key": "your_api_key"
     },
-    "templateEndpoint": "template",    
+    "templateEndpoint": "template",
     "servicesEndpoint": "services"
   },
   "find": {
     "include": [],
-    "exclude": ["AWS::CDK::Metadata"]
+    "exclude": [
+      "AWS::CDK::Metadata"
+    ]
   },
   "other": [
     "key"
   ],
-  "currency":"USD",
+  "currency": "USD",
   "budget": 50.00
 }

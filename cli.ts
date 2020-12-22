@@ -1,13 +1,13 @@
 #!/usr/bin/env node
 import yargs from 'yargs';
-import { proccessFromConfigFile} from './index';
+import { proccessFromConfigFile } from './index';
 import { isFileExist } from './src/utils/file';
 import fs from 'fs';
 import { exit } from 'process';
 
 const argv = yargs(process.argv.slice(2)).options({
   r: { type: 'boolean', default: false },
-  g: { type: 'boolean', default: false},
+  g: { type: 'boolean', default: false },
 }).argv;
 
 // console.log(`--> ${process.argv.slice(2)}`);
