@@ -227,7 +227,7 @@ export async function proccessFromConfigFile(filePath: string) {
                         break;
                 }
             }
-
+            console.log('\n');
             return apiReturn;
         } else {
             return [];
