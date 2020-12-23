@@ -234,7 +234,13 @@ export async function proccessFromConfigFile(filePath: string) {
         }
 
     } catch (e) {
-        console.log(`proccessFromConfigFile ${JSON.stringify(e.stack, null, 2)}`);
-        return e;
+        if (e.response.status === 403) {
+            console.log(`\n\x1b[31mAccess denied: Please check your API key in config file.`);
+        } else if (e.response.status === 502) {
+            console.log(`\n\x1b[31mServer error, please contact administrator.`);
+        } else {
+            console.log(`\n\x1b[31m${e.message}`);
+        }
+        exit(2);
     }
 }
