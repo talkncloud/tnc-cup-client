@@ -125,7 +125,7 @@ export async function proccessFromConfigFile(filePath: string) {
         if (availableServices && availableServices.data) {
             const c: Currency = { code: `${config.currency}` };
             console.log(`url: ${baseUrl}/${config.api.templateEndpoint}`);
-            console.log(`header: ${JSON.stringify(config.api.header)}`);
+            // console.log(`header: ${JSON.stringify(config.api.header)}`);
             console.log(`body: ${constructTemplateBodyApi(arrayResult, c, config.budget)}`);
             // console.log(`data: ${JSON.stringify(arrayResult, null, 2)}`);
 
