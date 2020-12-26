@@ -126,12 +126,12 @@ export async function proccessFromConfigFile(filePath: string) {
             const c: Currency = { code: `${config.currency}` };
             console.log(`url: ${baseUrl}/${config.api.templateEndpoint}`);
             // console.log(`header: ${JSON.stringify(config.api.header)}`);
-            console.log(`body: ${constructTemplateBodyApi(arrayResult, c, config.budget)}`);
+            console.log(`body: ${constructTemplateBodyApi(arrayResult, c, config.budget, config.region)}`);
             // console.log(`data: ${JSON.stringify(arrayResult, null, 2)}`);
 
             const apiReturn = await Axios.post(
                 `${baseUrl}/${config.api.templateEndpoint}`,
-                constructTemplateBodyApi(arrayResult, c, config.budget),
+                constructTemplateBodyApi(arrayResult, c, config.budget, config.region),
                 {
                     headers: config.api.header
                 }
