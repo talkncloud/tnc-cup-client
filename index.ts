@@ -108,7 +108,7 @@ export async function proccessFromConfigFile(filePath: string) {
         const availableServices = await Axios.get(`${baseUrl}/${config.api.servicesEndpoint}`, {
             headers: config.api.header
         });
-        const services: any[] = Object.keys(availableServices.data);
+        const services: any[] = Object.values(availableServices.data);
         // console.log(`Available Services: ${JSON.stringify(services)}`);
 
         let arrayResult = [];
