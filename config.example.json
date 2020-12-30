@@ -24,5 +24,6 @@
     "key"
   ],
   "currency": "USD",
-  "budget": 50.00
+  "budget": 50.00,
+  "region": "us-east-1"
 }
