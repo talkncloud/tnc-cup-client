@@ -1,0 +1,97 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "Create a DB subnet group and MYSQL Database"
+
+Parameters:
+  VPC:
+    Type: String
+    Description: The VPC to create the cluster
+    Default: vpc-ID
+
+  PrivateSubnet01:
+    Type: String
+    Description: The subnet for the DB cluster
+    Default: subnet-ID
+
+  PrivateSubnet02:
+    Type: String
+    Description: The subnet for the DB cluster
+    Default: subnet-ID
+
+  MasterUsername:
+    Type: String
+    Description: The username for our database.
+  
+  MasterUserPassword:
+    Type: String
+    Description: The password for the database.
+    "NoEcho": true
+
+  ParameterGroup:
+    Type: String
+    Description: The name of the database parameter group created.
+
+Resources:
+    EC2SecurityGroup:
+        Type: "AWS::EC2::SecurityGroup"
+        Properties:
+            GroupDescription: "Database instances security group"
+            VpcId: !Ref VPC
+            SecurityGroupIngress: 
+              - 
+                CidrIp: "*.*.*.*/32"
+                FromPort: 3306
+                IpProtocol: "tcp"
+                ToPort: 3306
+            SecurityGroupEgress: 
+              - 
+                CidrIp: "0.0.0.0/0"
+                IpProtocol: "-1"
+
+    RDSDBSubnetGroup:
+        Type: "AWS::RDS::DBSubnetGroup"
+        Properties:
+            DBSubnetGroupDescription: "Subnet Group for mySQL database"
+            DBSubnetGroupName: !Sub "${AWS::Region}-aws-dxl-database-subnet-group"
+            SubnetIds: 
+              - !Ref PrivateSubnet01
+              - !Ref PrivateSubnet02
+
+    RDSDBInstance:
+        Type: AWS::RDS::DBInstance
+        Properties:
+            DBInstanceIdentifier: aws-dxl-database-1
+            AllocatedStorage: 100
+            DBInstanceClass: db.m5.xlarge
+            Engine: "POSTGRESQL"
+            MasterUsername: !Ref MasterUsername
+            MasterUserPassword: !Ref MasterUserPassword
+            BackupRetentionPeriod: 7
+            MultiAZ: true
+            EngineVersion: 8.0.20
+            AutoMinorVersionUpgrade: true
+            Iops: 5000
+            PubliclyAccessible: false
+            StorageType: io1
+            Port: 3306
+            StorageEncrypted: true
+            CopyTagsToSnapshot: true
+            MonitoringInterval: 60
+            EnableIAMDatabaseAuthentication: false
+            EnablePerformanceInsights: true
+            PerformanceInsightsRetentionPeriod: 7
+            DeletionProtection: true
+            DBSubnetGroupName: !Ref RDSDBSubnetGroup
+            VPCSecurityGroups: 
+              - !Ref EC2SecurityGroup
+            MaxAllocatedStorage: 1000
+            DBParameterGroupName: !Ref ParameterGroup
+            MonitoringRoleArn: !Sub "arn:aws:iam::${AWS::AccountId}:role/rds-monitoring-role"
+
+Outputs:
+   Cluster:
+    Description: The DB Cluster Name
+    Value: !Ref RDSDBInstance
+    
+   SubnetGroup:
+    Description: The db subnet group name 
+    Value: !Ref RDSDBSubnetGroup

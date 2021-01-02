@@ -1,0 +1,637 @@
+{
+  "Resources": {
+    "tncdb38B2E622": {
+      "Type": "AWS::DynamoDB::Table",
+      "Properties": {
+        "KeySchema": [
+          {
+            "AttributeName": "id",
+            "KeyType": "HASH"
+          }
+        ],
+        "AttributeDefinitions": [
+          {
+            "AttributeName": "id",
+            "AttributeType": "S"
+          }
+        ],
+        "ProvisionedThroughput": {
+          "ReadCapacityUnits": 5,
+          "WriteCapacityUnits": 5
+        }
+      },
+      "UpdateReplacePolicy": "Retain",
+      "DeletionPolicy": "Retain",
+      "Metadata": {
+        "aws:cdk:path": "AppsyncWafStack/tnc-db/Resource"
+      }
+    },
+    "tncup": {
+      "Type": "AWS::Cognito::UserPool",
+      "Properties": {
+        "AdminCreateUserConfig": {
+          "AllowAdminCreateUserOnly": true
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "AppsyncWafStack/tnc-up"
+      }
+    },
+    "tncclient": {
+      "Type": "AWS::Cognito::UserPoolClient",
+      "Properties": {
+        "UserPoolId": {
+          "Ref": "tncup"
+        },
+        "AllowedOAuthFlows": [
+          "code"
+        ],
+        "AllowedOAuthFlowsUserPoolClient": true,
+        "AllowedOAuthScopes": [
+          "email",
+          "aws.cognito.signin.user.admin",
+          "openid",
+          "profile"
+        ],
+        "CallbackURLs": [
+          "tnc://signin"
+        ],
+        "ClientName": "tnc",
+        "GenerateSecret": false,
+        "LogoutURLs": [
+          "tnc://signout"
+        ],
+        "SupportedIdentityProviders": [
+          "COGNITO"
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "AppsyncWafStack/tnc-client"
+      }
+    },
+    "tncidp": {
+      "Type": "AWS::Cognito::IdentityPool",
+      "Properties": {
+        "AllowUnauthenticatedIdentities": false,
+        "CognitoIdentityProviders": [
+          {
+            "ClientId": {
+              "Ref": "tncclient"
+            },
+            "ProviderName": {
+              "Fn::GetAtt": [
+                "tncup",
+                "ProviderName"
+              ]
+            }
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "AppsyncWafStack/tnc-idp"
+      }
+    },
+    "tncunauthRole994CB4A9": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRoleWithWebIdentity",
+              "Condition": {
+                "StringEquals": {
+                  "cognito-identity.amazonaws.com:aud": {
+                    "Ref": "tncidp"
+                  }
+                },
+                "ForAnyValue:StringLike": {
+                  "cognito-identity.amazonaws.com:amr": "unauthenticated"
+                }
+              },
+              "Effect": "Allow",
+              "Principal": {
+                "Federated": "cognito-identity.amazonaws.com"
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "RoleName": "unAuthRole"
+      },
+      "Metadata": {
+        "aws:cdk:path": "AppsyncWafStack/tnc-unauthRole/Resource"
+      }
+    },
+    "tncauthroleEE0D2184": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRoleWithWebIdentity",
+              "Condition": {
+                "StringEquals": {
+                  "cognito-identity.amazonaws.com:aud": {
+                    "Ref": "tncidp"
+                  }
+                },
+                "ForAnyValue:StringLike": {
+                  "cognito-identity.amazonaws.com:amr": "authenticated"
+                }
+              },
+              "Effect": "Allow",
+              "Principal": {
+                "Federated": "cognito-identity.amazonaws.com"
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "RoleName": "authRole"
+      },
+      "Metadata": {
+        "aws:cdk:path": "AppsyncWafStack/tnc-authrole/Resource"
+      }
+    },
+    "tncroles": {
+      "Type": "AWS::Cognito::IdentityPoolRoleAttachment",
+      "Properties": {
+        "IdentityPoolId": {
+          "Ref": "tncidp"
+        },
+        "Roles": {
+          "authenticated": {
+            "Fn::GetAtt": [
+              "tncauthroleEE0D2184",
+              "Arn"
+            ]
+          },
+          "unauthenticated": {
+            "Fn::GetAtt": [
+              "tncunauthRole994CB4A9",
+              "Arn"
+            ]
+          }
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "AppsyncWafStack/tnc-roles"
+      }
+    },
+    "api": {
+      "Type": "AWS::AppSync::GraphQLApi",
+      "Properties": {
+        "AuthenticationType": "AMAZON_COGNITO_USER_POOLS",
+        "Name": "talkncloud",
+        "UserPoolConfig": {
+          "AwsRegion": {
+            "Ref": "AWS::Region"
+          },
+          "DefaultAction": "ALLOW",
+          "UserPoolId": {
+            "Ref": "tncup"
+          }
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "AppsyncWafStack/api"
+      }
+    },
+    "tncschema": {
+      "Type": "AWS::AppSync::GraphQLSchema",
+      "Properties": {
+        "ApiId": {
+          "Fn::GetAtt": [
+            "api",
+            "ApiId"
+          ]
+        },
+        "Definition": "type Todo {\n  id: ID!\n  name: String!\n  description: String\n}\n\nenum ModelSortDirection {\n  ASC\n  DESC\n}\n\ntype ModelTodoConnection {\n  items: [Todo]\n  nextToken: String\n}\n\ninput ModelStringInput {\n  ne: String\n  eq: String\n  le: String\n  lt: String\n  ge: String\n  gt: String\n  contains: String\n  notContains: String\n  between: [String]\n  beginsWith: String\n  attributeExists: Boolean\n  attributeType: ModelAttributeTypes\n  size: ModelSizeInput\n}\n\ninput ModelIDInput {\n  ne: ID\n  eq: ID\n  le: ID\n  lt: ID\n  ge: ID\n  gt: ID\n  contains: ID\n  notContains: ID\n  between: [ID]\n  beginsWith: ID\n  attributeExists: Boolean\n  attributeType: ModelAttributeTypes\n  size: ModelSizeInput\n}\n\ninput ModelIntInput {\n  ne: Int\n  eq: Int\n  le: Int\n  lt: Int\n  ge: Int\n  gt: Int\n  between: [Int]\n  attributeExists: Boolean\n  attributeType: ModelAttributeTypes\n}\n\ninput ModelFloatInput {\n  ne: Float\n  eq: Float\n  le: Float\n  lt: Float\n  ge: Float\n  gt: Float\n  between: [Float]\n  attributeExists: Boolean\n  attributeType: ModelAttributeTypes\n}\n\ninput ModelBooleanInput {\n  ne: Boolean\n  eq: Boolean\n  attributeExists: Boolean\n  attributeType: ModelAttributeTypes\n}\n\ninput ModelSizeInput {\n  ne: Int\n  eq: Int\n  le: Int\n  lt: Int\n  ge: Int\n  gt: Int\n  between: [Int]\n}\n\ninput ModelTodoFilterInput {\n  id: ModelIDInput\n  name: ModelStringInput\n  description: ModelStringInput\n  and: [ModelTodoFilterInput]\n  or: [ModelTodoFilterInput]\n  not: ModelTodoFilterInput\n}\n\ntype Query {\n  getTodo(id: ID!): Todo\n  listTodos(filter: ModelTodoFilterInput, limit: Int, nextToken: String): ModelTodoConnection\n}\n\ninput CreateTodoInput {\n  id: ID\n  name: String!\n  description: String\n}\n\ntype Mutation {\n  createTodo(input: CreateTodoInput!, condition: ModelTodoConditionInput): Todo\n}\n\ninput ModelTodoConditionInput {\n  name: ModelStringInput\n  description: ModelStringInput\n  and: [ModelTodoConditionInput]\n  or: [ModelTodoConditionInput]\n  not: ModelTodoConditionInput\n}\n\nenum ModelAttributeTypes {\n  binary\n  binarySet\n  bool\n  list\n  map\n  number\n  numberSet\n  string\n  stringSet\n  _null\n}"
+      },
+      "Metadata": {
+        "aws:cdk:path": "AppsyncWafStack/tnc-schema"
+      }
+    },
+    "tncdbRoleBA7ABA7B": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "appsync.amazonaws.com"
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "AppsyncWafStack/tnc-dbRole/Resource"
+      }
+    },
+    "tncdbRoleDefaultPolicy9DD0C4BF": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "dynamodb:PutItem",
+                "dynamodb:QueryItem",
+                "dynamodb:GetItem",
+                "dynamodb:Scan",
+                "dynamodb:Query"
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "tncdb38B2E622",
+                  "Arn"
+                ]
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "PolicyName": "tncdbRoleDefaultPolicy9DD0C4BF",
+        "Roles": [
+          {
+            "Ref": "tncdbRoleBA7ABA7B"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "AppsyncWafStack/tnc-dbRole/DefaultPolicy/Resource"
+      }
+    },
+    "tncdynamodb": {
+      "Type": "AWS::AppSync::DataSource",
+      "Properties": {
+        "ApiId": {
+          "Fn::GetAtt": [
+            "api",
+            "ApiId"
+          ]
+        },
+        "Name": "dynamodb",
+        "Type": "AMAZON_DYNAMODB",
+        "Description": "talkncloud dynamo datasource",
+        "DynamoDBConfig": {
+          "AwsRegion": {
+            "Ref": "AWS::Region"
+          },
+          "TableName": {
+            "Ref": "tncdb38B2E622"
+          }
+        },
+        "ServiceRoleArn": {
+          "Fn::GetAtt": [
+            "tncdbRoleBA7ABA7B",
+            "Arn"
+          ]
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "AppsyncWafStack/tnc-dynamodb"
+      }
+    },
+    "mutationCreateTodoReqRes": {
+      "Type": "AWS::AppSync::Resolver",
+      "Properties": {
+        "ApiId": {
+          "Fn::GetAtt": [
+            "api",
+            "ApiId"
+          ]
+        },
+        "FieldName": "createTodo",
+        "TypeName": "Mutation",
+        "DataSourceName": "dynamodb",
+        "RequestMappingTemplate": "## [Start] Prepare DynamoDB PutItem Request. **\n$util.qr($context.args.input.put(\"createdAt\", $util.defaultIfNull($ctx.args.input.createdAt, $util.time.nowISO8601())))\n$util.qr($context.args.input.put(\"updatedAt\", $util.defaultIfNull($ctx.args.input.updatedAt, $util.time.nowISO8601())))\n$util.qr($context.args.input.put(\"__typename\", \"Todo\"))\n#set( $condition = {\n  \"expression\": \"attribute_not_exists(#id)\",\n  \"expressionNames\": {\n      \"#id\": \"id\"\n  }\n} )\n#if( $context.args.condition )\n  #set( $condition.expressionValues = {} )\n  #set( $conditionFilterExpressions = $util.parseJson($util.transform.toDynamoDBConditionExpression($context.args.condition)) )\n  $util.qr($condition.put(\"expression\", \"($condition.expression) AND $conditionFilterExpressions.expression\"))\n  $util.qr($condition.expressionNames.putAll($conditionFilterExpressions.expressionNames))\n  $util.qr($condition.expressionValues.putAll($conditionFilterExpressions.expressionValues))\n#end\n#if( $condition.expressionValues && $condition.expressionValues.size() == 0 )\n  #set( $condition = {\n  \"expression\": $condition.expression,\n  \"expressionNames\": $condition.expressionNames\n} )\n#end\n{\n  \"version\": \"2017-02-28\",\n  \"operation\": \"PutItem\",\n  \"key\": #if( $modelObjectKey ) $util.toJson($modelObjectKey) #else {\n  \"id\":   $util.dynamodb.toDynamoDBJson($util.defaultIfNullOrBlank($ctx.args.input.id, $util.autoId()))\n} #end,\n  \"attributeValues\": $util.dynamodb.toMapValuesJson($context.args.input),\n  \"condition\": $util.toJson($condition)\n}\n## [End] Prepare DynamoDB PutItem Request. **",
+        "ResponseMappingTemplate": "$util.toJson($ctx.result)"
+      },
+      "DependsOn": [
+        "tncdynamodb"
+      ],
+      "Metadata": {
+        "aws:cdk:path": "AppsyncWafStack/mutationCreateTodoReqRes"
+      }
+    },
+    "QueryTodoReqRes": {
+      "Type": "AWS::AppSync::Resolver",
+      "Properties": {
+        "ApiId": {
+          "Fn::GetAtt": [
+            "api",
+            "ApiId"
+          ]
+        },
+        "FieldName": "getTodo",
+        "TypeName": "Query",
+        "DataSourceName": "dynamodb",
+        "RequestMappingTemplate": "{\n  \"version\": \"2017-02-28\",\n  \"operation\": \"GetItem\",\n  \"key\": #if( $modelObjectKey ) $util.toJson($modelObjectKey) #else {\n  \"id\": $util.dynamodb.toDynamoDBJson($ctx.args.id)\n} #end\n}",
+        "ResponseMappingTemplate": "$util.toJson($ctx.result)"
+      },
+      "DependsOn": [
+        "tncdynamodb"
+      ],
+      "Metadata": {
+        "aws:cdk:path": "AppsyncWafStack/QueryTodoReqRes"
+      }
+    },
+    "waf": {
+      "Type": "AWS::WAFv2::WebACL",
+      "Properties": {
+        "DefaultAction": {
+          "Allow": {}
+        },
+        "Scope": "REGIONAL",
+        "VisibilityConfig": {
+          "CloudWatchMetricsEnabled": true,
+          "MetricName": "tnc-firewall",
+          "SampledRequestsEnabled": true
+        },
+        "Description": "ACL for talkncloud appsync",
+        "Rules": [
+          {
+            "Action": {
+              "Count": {}
+            },
+            "Name": "GeoMatch",
+            "Priority": 0,
+            "Statement": {
+              "NotStatement": {
+                "Statement": {
+                  "GeoMatchStatement": {
+                    "CountryCodes": [
+                      "AU"
+                    ]
+                  }
+                }
+              }
+            },
+            "VisibilityConfig": {
+              "CloudWatchMetricsEnabled": true,
+              "MetricName": "GeoMatch",
+              "SampledRequestsEnabled": true
+            }
+          },
+          {
+            "Name": "AWS-AWSManagedRulesCommonRuleSet",
+            "OverrideAction": {
+              "None": {}
+            },
+            "Priority": 1,
+            "Statement": {
+              "ManagedRuleGroupStatement": {
+                "ExcludedRules": [
+                  {
+                    "Name": "NoUserAgent_HEADER"
+                  }
+                ],
+                "Name": "AWSManagedRulesCommonRuleSet",
+                "VendorName": "AWS"
+              }
+            },
+            "VisibilityConfig": {
+              "CloudWatchMetricsEnabled": true,
+              "MetricName": "AWS-AWSManagedRulesCommonRuleSet",
+              "SampledRequestsEnabled": true
+            }
+          },
+          {
+            "Action": {
+              "Block": {}
+            },
+            "Name": "LimitRequests100",
+            "Priority": 2,
+            "Statement": {
+              "RateBasedStatement": {
+                "AggregateKeyType": "IP",
+                "Limit": 100
+              }
+            },
+            "VisibilityConfig": {
+              "CloudWatchMetricsEnabled": true,
+              "MetricName": "LimitRequests100",
+              "SampledRequestsEnabled": true
+            }
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "AppsyncWafStack/waf"
+      }
+    },
+    "tncwafassoc": {
+      "Type": "AWS::WAFv2::WebACLAssociation",
+      "Properties": {
+        "ResourceArn": {
+          "Fn::GetAtt": [
+            "api",
+            "Arn"
+          ]
+        },
+        "WebACLArn": {
+          "Fn::GetAtt": [
+            "waf",
+            "Arn"
+          ]
+        }
+      },
+      "DependsOn": [
+        "api"
+      ],
+      "Metadata": {
+        "aws:cdk:path": "AppsyncWafStack/tnc-waf-assoc"
+      }
+    },
+    "CDKMetadata": {
+      "Type": "AWS::CDK::Metadata",
+      "Properties": {
+        "Modules": "aws-cdk=1.68.0,@aws-cdk/assets=1.70.0,@aws-cdk/aws-applicationautoscaling=1.70.0,@aws-cdk/aws-appsync=1.70.0,@aws-cdk/aws-autoscaling-common=1.70.0,@aws-cdk/aws-cloudwatch=1.70.0,@aws-cdk/aws-codeguruprofiler=1.70.0,@aws-cdk/aws-cognito=1.70.0,@aws-cdk/aws-dynamodb=1.70.0,@aws-cdk/aws-ec2=1.70.0,@aws-cdk/aws-events=1.70.0,@aws-cdk/aws-iam=1.70.0,@aws-cdk/aws-kms=1.70.0,@aws-cdk/aws-lambda=1.70.0,@aws-cdk/aws-logs=1.70.0,@aws-cdk/aws-s3=1.70.0,@aws-cdk/aws-s3-assets=1.70.0,@aws-cdk/aws-sqs=1.70.0,@aws-cdk/aws-ssm=1.70.0,@aws-cdk/aws-wafv2=1.70.0,@aws-cdk/cloud-assembly-schema=1.70.0,@aws-cdk/core=1.70.0,@aws-cdk/custom-resources=1.70.0,@aws-cdk/cx-api=1.70.0,@aws-cdk/region-info=1.70.0,jsii-runtime=node.js/v13.8.0"
+      },
+      "Metadata": {
+        "aws:cdk:path": "AppsyncWafStack/CDKMetadata/Default"
+      },
+      "Condition": "CDKMetadataAvailable"
+    }
+  },
+  "Conditions": {
+    "CDKMetadataAvailable": {
+      "Fn::Or": [
+        {
+          "Fn::Or": [
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "ap-east-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "ap-northeast-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "ap-northeast-2"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "ap-south-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "ap-southeast-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "ap-southeast-2"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "ca-central-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "cn-north-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "cn-northwest-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "eu-central-1"
+              ]
+            }
+          ]
+        },
+        {
+          "Fn::Or": [
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "eu-north-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "eu-west-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "eu-west-2"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "eu-west-3"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "me-south-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "sa-east-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "us-east-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "us-east-2"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "us-west-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "us-west-2"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

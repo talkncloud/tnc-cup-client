@@ -1,6 +1,5 @@
 .DS_Store
 node_modules/*
-testfiles/*
 dist/
 config.tien.json
 sample-data/
