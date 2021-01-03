@@ -83,6 +83,7 @@ In general, to use the API you'll need an API key, the keys have typical rate li
 
 ### Endpoints ###
 
+**Post body to api**
 ```http
 POST /template
 ```
@@ -123,7 +124,7 @@ POST /template
     }
 ]
 ```
-
+**List current supported services**
 ```http
 GET /services
 ```
@@ -139,7 +140,7 @@ GET /services
     "WAFv2:WebACL": "AWS::WAFv2::WebACL"
 }
 ```
-
+**List supported currencies for conversion**
 ```http
 GET /currency
 ```
