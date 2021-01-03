@@ -5,3 +5,5 @@ sample-data/
 .vscode/*
 package-lock.json
 package.tien.org
+src/*
+testfiles/*
