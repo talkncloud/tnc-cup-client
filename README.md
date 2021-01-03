@@ -16,7 +16,7 @@ Some key features:
   * CI/CD friendly with error 0, 1, 2
   * Cli output with tabular display
 
-**How to Install**
+## How to Install ##
 
 ```
 npm install -g @talkncloud/tnc-cup
@@ -24,7 +24,7 @@ npm install -g @talkncloud/tnc-cup
 
 tnc-cup can now be used from the terminal simply by running "tnc-cup"
 
-**Configuration**
+## Configuration ##
 
 The local configuration contains common configuration parameters required to use tnc-cup. The configuration file is located in the $HOME directory named ".tnc-cup.config.json".
 
@@ -36,7 +36,7 @@ tnc-cup -c
 
 a new file will be create in $HOME/.tnc-cup.config.example.json
 
-**Configuration Parameters**
+## Configuration Parameters ##
 
 | Key | Type | Possible values | Description |
 |---|---|---|---|
@@ -56,9 +56,124 @@ a new file will be create in $HOME/.tnc-cup.config.example.json
 | region | string | `ap-southeast-2` | AWS compatible region code |
 
 
-**API KEY**
+## API KEY ##
 
 Go to [tnc-cup](https://cup.talkncloud.com/signup) to register, once registered use the dashboard to generate an API KEY. Use this key to update your tnc-cup.config.json.
 
-**API**
+## Cli parameters ##
 
+1. -c = generate configuration file
+2. -t = template file to parse
+
+## Example ##
+
+1. Navigate to your directory with the cloudformation template
+2. tnc-cup -t mytemplate.json | yaml
+
+<img src="https://cup.talkncloud.com/img/tnc-cup-client-sample.f731cf0c.png" alt="alt text" title="example output" />
+
+
+## API ##
+tnc-cup consists of a client that interfaces with the backend api. The backend api exposes a few endpoints and can be queried using typical curl tools. 
+
+### Authorization ###
+In general, to use the API you'll need an API key, the keys have typical rate limiting etc enabled. To use the endpoints below add the following to the header:
+
+`x-api-key: 'YOUR AWESOME KEY HERE'`
+
+### Endpoints ###
+
+```http
+POST /template
+```
+> Body
+```javascript
+[{"file":[{"WebInstance":{"Type":"AWS::EC2::Instance","Properties":{"BlockDeviceMappings":[{"DeviceName":"/dev/sda1","Ebs":{"VolumeSize":24000,"VolumeType":"gp3"}}],"InstanceType":"t2.nano","ImageId":"ami-80861296","KeyName":"my-key","Monitoring":true,"SecurityGroupIds":[{"class":"Ref","name":"Ref","data":"WebSecurityGroup"}],"SubnetId":"subnet-abc01234","Tags":[{"Key":"Name","Value":"webserver"}],"Volumes":[{"Device":"/dev/sdf","VolumeId":{"class":"Ref","name":"Ref","data":"LogVolume"}}]}}}],"currency":{"code":"USD"},"budget":10, "region": "us-east-1"}]
+```
+> Response
+```javascript
+[
+    {
+        "EC2": {
+            "Compute": {
+                "description": "$0.0058 per On Demand Linux t2.nano Instance Hour - ami: Canonical, Ubuntu, 16.04 LTS, amd64 xenial image build on 2017-04-14",
+                "price": 4.0
+            },
+            "Storage-AMI": {
+                "description": "$0.10 per GB-month of General Purpose SSD (gp2) provisioned storage - US East (Northern Virginia) size: 8GB",
+                "price": 0.8
+            },
+            "Storage": {
+                "description": "$0.005 per provisioned IOPS-month of gp3 - US East (N. Virginia) size: 24000GB",
+                "price": 120.0
+            }
+        }
+    },
+    {
+        "TOTAL (USD)": {
+            "description": "Total estimated price (USD)",
+            "price": 125
+        }
+    },
+    {
+        "budget": {
+            "status": 1,
+            "message": "over budget by $114 (USD)"
+        }
+    }
+]
+```
+
+```http
+GET /services
+```
+> Response
+```javascript
+{
+    "AppSync:GraphQLApi": "AWS::AppSync::GraphQLApi",
+    "Cognito:UserPool": "AWS::Cognito::UserPool",
+    "EC2:Instance": "AWS::EC2::Instance",
+    "EC2:Volume": "AWS::EC2::Volume",
+    "RDS:DBInstance": "AWS::RDS::DBInstance",
+    "S3:Bucket": "AWS::S3::Bucket",
+    "WAFv2:WebACL": "AWS::WAFv2::WebACL"
+}
+```
+
+```http
+GET /currency
+```
+> Response
+
+```javascript
+{
+    "results": {
+        "ALL": {
+            "currencyName": "Albanian Lek",
+            "currencySymbol": "Lek",
+            "id": "ALL"
+        },
+        "XCD": {
+            "currencyName": "East Caribbean Dollar",
+            "currencySymbol": "$",
+            "id": "XCD"
+        },
+        "EUR": {
+            "currencyName": "Euro",
+            "currencySymbol": "€",
+            "id": "EUR"
+        }...
+```
+
+### API response codes ###
+
+| Status Code | Description |
+| :--- | :--- |
+| 200 | `OK` |
+| 400 | `BAD REQUEST` |
+| 403 | `ACCESS DENIED` |
+| 429 | `TOO MANY REQUESTS / LIMIT` |
+| 500 | `INTERNAL SERVER ERROR` |
+| 502 | `BAD GATEWAY` |
+| 503 | `UNAVAILABLE` |
+| 504 | `TIMEOUT` |
