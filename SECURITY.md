@@ -10,5 +10,5 @@ Only the lastest version is supported at this time. If you haven't already pleas
 
 ## Reporting a Vulnerability
 
-Please report any security concerns by creating a new github issue in this project or contact the security team directly on tnc-cup@talkncloud.com. All reported potential vulnerabilities will be investigated as a priority.
+Please report any security concerns by creating a new github issue in this project or contact the security team directly on security@talkncloud.com. All reported potential vulnerabilities will be investigated as a priority.
 
