@@ -18,9 +18,22 @@ Some key features:
 
 **How to Install**
 
-`npm install -g @talkncloud/tnc-cup`
+```
+npm install -g @talkncloud/tnc-cup
+```
 
-**How to use**
+tnc-cup can now be used from the terminal simply by running "tnc-cup"
+
+**Configuration**
+
+The local configuration contains common configuration parameters required to use tnc-cup. The configuration file is located in the $HOME directory named ".tnc-cup.config.json".
+
+Install the sample config file by running the following command
+
+```
+tnc-cup -g
+```
+
 
 **CLI**
 

@@ -26,11 +26,12 @@ if (argv.t) {
     exit(2);
   }
 } else {
-  if (argv.g) {
+  const homedir = require('os').homedir();
+
+  if (argv.c) {
     const path = require('path');
-    fs.copyFileSync(path.resolve(__dirname, 'config.example.json'), './config.example.json');
-  } else {
-    const homedir = require('os').homedir();
+    fs.copyFileSync(path.resolve(__dirname, '../config.example.json'), homedir + '/.tnc-cup.config.example.json');
+  } else { 
 
     proccessFromConfigFile(homedir + '/.tnc-cup.config.json').then(result => {
       arrayResult.push(result);
