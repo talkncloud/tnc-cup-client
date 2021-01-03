@@ -141,7 +141,7 @@ export async function proccessFromConfigFile(filePath: string) {
 
             const table = new Table({
                 head: [colors.white("Service"), colors.white("Group"), colors.white("Description"), colors.white("Price")],
-                colWidths: [15, 15, 90, 10],
+                colWidths: [20, 7, 93, 10],
                 wordWrap: true,
                 chars: {
                     'top': '═', 'top-mid': '╤', 'top-left': '╔', 'top-right': '╗'
