@@ -63,3 +63,28 @@ Resources:
     Properties:
       InstanceId: !Ref WebInstance
       Domain: vpc
+
+  FakeInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      BlockDeviceMappings:
+        -
+          DeviceName: "/dev/sda1"
+          Ebs:
+            VolumeSize: 666
+            VolumeType: gp2
+      InstanceType: t3.xlarge
+      ImageId: ami-0229f7666f517b31e
+      KeyName: my-key
+      Monitoring: true
+      SecurityGroupIds:
+        - !Ref WebSecurityGroup
+      SubnetId: subnet-abc01234
+      Tags:
+        -
+          Key: Name
+          Value: webserver
+      Volumes:
+        -
+          Device: "/dev/sdf"
+          VolumeId: !Ref LogVolume
