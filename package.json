@@ -11,7 +11,7 @@
   },
   "author": "talkncloud",
   "license": "ISC",
-  "homepage": "https://www.talkncloud.com",
+  "homepage": "https://cup.talkncloud.com",
   "repository": "https://github.com/talkncloud/tnc-cup-client",
   "devDependencies": {
     "@tsconfig/recommended": "^1.0.1",
