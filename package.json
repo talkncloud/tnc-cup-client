@@ -1,7 +1,7 @@
 {
   "name": "@talkncloud/tnc-cup",
   "description": "this package will process cloudformation templates and post to the talkncloud tnc-cup api",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "main": "index.js",
   "scripts": {
     "test": "sh test.sh",
@@ -32,6 +32,6 @@
     "yargs": "^16.1.0"
   },
   "bin": {
-    "tnc-cup": "dist/cli.js"
+    "tnc-cup": "./dist/cli.js"
   }
 }
