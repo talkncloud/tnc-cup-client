@@ -1,7 +1,9 @@
-# [tnc-cup](https://cup.talkncloud.com) 
+# [tnc-cup](https://cup.talkncloud.com)
 
 [![GitHub license](https://img.shields.io/github/license/talkncloud/tnc-cup-client?color=blue&style=flat-square)](https://github.com/talkncloud/tnc-cup-client/blob/master/LICENSE)
 [![npm version](https://img.shields.io/npm/v/@talkncloud/tnc-cup?style=flat-square)](https://www.npmjs.com/package/@talkncloud/tnc-cup)
+[![Known Vulnerabilities](https://img.shields.io/snyk/vulnerabilities/github/talkncloud/tnc-cup-client?style=flat-square&targetFile=package.json)](https://snyk.io/test/github/talkncloud/tnc-cup-client?targetFile=package.json)
+
 
 **Note**: This is currently in **PREVIEW**. There will be bugs, we will fix the bugs. 
 
