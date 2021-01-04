@@ -1,4 +1,4 @@
-:+1::tada: First off, thanks for taking the time to contribute! :tada::+1:
+:metal: First off, thanks for taking the time to contribute! :muscle:
 
 ## How to contribute to tnc-cup
 
@@ -26,6 +26,6 @@ Note: everything is in github, if what you're chasing isn't addressed here just 
 
 * Ask any question about how to use tnc-cup in the [Issues](https://github.com/talkncloud/tnc-cup-client/issues), just mark it as question and we'll get right onto it.
 
-Thanks! :heart: :heart: :heart:
+Thanks! :v: :thumbsup:
 
 tnc-cup & talkncloud

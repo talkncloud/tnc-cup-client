@@ -183,4 +183,4 @@ GET /currency
 
 ### Contributing ###
 
-Yes please! Check out our [contribution](https://github.com/talkncloud/tnc-cup-client/CONTRIBUTING.md) guide.
+Yes please! Check out our [contribution](https://github.com/talkncloud/tnc-cup-client/blob/main/CONTRIBUTING.md) guide.
