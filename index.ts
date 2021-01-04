@@ -234,10 +234,32 @@ export async function proccessFromConfigFile(filePath: string) {
         }
 
     } catch (e) {
-        if (e.response.status === 403) {
-            console.log(`\n\x1b[31mAccess denied: Please check your API key in config file.`);
-        } else if (e.response.status === 502) {
-            console.log(`\n\x1b[31mServer error, please contact administrator.`);
+        // if the url is incorrect it won't have a response object
+        if (e.response) {
+            if (e.response.status === 400) {
+                console.log(`\n\x1b[31mBad request.`);
+            }   
+                else if (e.response.status === 403) {
+                console.log(`\n\x1b[31mAccess denied: Please check your API key in config file.`);
+            }
+                else if (e.response.status === 429) {
+                    console.log(`\n\x1b[31mToo many requests or limit reached.`);
+            }
+                else if (e.response.status === 500) {
+                console.log(`\n\x1b[31mInternal error, please contact administrator.`);
+            }
+                else if (e.response.status === 502) {
+                console.log(`\n\x1b[31mBad gateway, please contact administrator.`);
+            }
+                else if (e.response.status === 503) {
+                console.log(`\n\x1b[31mUnavailable, please try again.`);
+            }
+                else if (e.response.status === 504) {
+                console.log(`\n\x1b[31mTimeout, please try again.`);
+            } else {
+                console.log(`\n\x1b[31m${e.message}`);
+            }
+        
         } else {
             console.log(`\n\x1b[31m${e.message}`);
         }
