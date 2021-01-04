@@ -180,3 +180,7 @@ GET /currency
 | 502 | `BAD GATEWAY` |
 | 503 | `UNAVAILABLE` |
 | 504 | `TIMEOUT` |
+
+### Contributing ###
+
+Yes please! Check out our [contribution](https://github.com/talkncloud/tnc-cup/CONTRIBUTING.md) guide.
