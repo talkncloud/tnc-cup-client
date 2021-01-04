@@ -14,7 +14,7 @@ const argv = yargs(process.argv.slice(2)).options({
 // console.log(`--> ${process.argv.slice(2)}`);
 // console.log(`--> ${JSON.stringify(argv)}`);
 
-if (process.argv.length <= 1) {
+if (process.argv.length <= 2) {
   console.error(`usage: [-t template.json] [-c to generate config]`);
   terminateApp(TERMINATE_ON_ERROR);
 }
