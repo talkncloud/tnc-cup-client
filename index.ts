@@ -8,7 +8,8 @@ import { parseYamlFromPath, constructTemplateBodyApi } from './src/utils/parser'
 import Table from "cli-table3"
 import colors from "colors";
 import { Currency } from './src/models/currency';
-import { exit } from 'process';
+import { terminateApp } from './src/utils/app';
+import { TERMINATE_ON_ERROR } from './src/utils/constants';
 const homedir = require('os').homedir();
 
 function find(content: any, includeSearchContent: any[], excludeSearchContent?: any[], availableServices?: any[]) {
@@ -265,6 +266,6 @@ export async function proccessFromConfigFile(filePath: string) {
         } else {
             console.log(`\n\x1b[31m${e.message}`);
         }
-        exit(2);
+        terminateApp(TERMINATE_ON_ERROR);
     }
 }
