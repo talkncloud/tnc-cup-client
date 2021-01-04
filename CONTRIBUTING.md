@@ -8,7 +8,7 @@ Note: everything is in github, if what you're chasing isn't addressed here just 
 
 * **Ensure the bug was not already reported** by searching on GitHub under [Issues](https://github.com/talkncloud/tnc-cup-client/issues).
 
-* If you're unable to find an open issue addressing the problem, [open a new one](https://github.com/talkncloud/tnc-cup-client/issues/new). Be sure to include a **title and clear description**, as much relevant information as possible, and a **code sample** or an **executable test case** demonstrating the expected behavior that is not occurring. Pictures or videos are also helpful.
+* If you're unable to find an open issue addressing the problem, [open a new one](https://github.com/talkncloud/tnc-cup-client/issues/new). Be sure to include a **title and clear description**, as much relevant information as possible, and a **code sample** or an **executable test case** demonstrating the expected behavior that is not occurring. Pictures or videos are also helpful as are the original CF template (if permitted).
 
 #### **Did you write a patch that fixes a bug? (AWESOME!)**
 
@@ -24,7 +24,7 @@ Note: everything is in github, if what you're chasing isn't addressed here just 
 
 #### **Do you have questions about the source code?**
 
-* Ask any question about how to use tnc-cup in the [Issues](https://github.com/talkncloud/tnc-cup-client/issues), just mark it as question and we'll get right onto it.
+* We've enabled github discussions!! Ask any question about how to use tnc-cup in the [Discussions](https://github.com/talkncloud/tnc-cup-client/discussions), this is a good place to start.
 
 Thanks! :v: :thumbsup:
 
