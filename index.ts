@@ -12,7 +12,7 @@ import { exit } from 'process';
 const homedir = require('os').homedir();
 
 function find(content: any, includeSearchContent: any[], excludeSearchContent?: any[], availableServices?: any[]) {
-    console.log(`find`);
+    // console.log(`find`);
     let arrayFindResult = [];
     for (let key of Object.keys(content['Resources'])) {
         const service = content['Resources'][key]['Type'];
@@ -46,7 +46,7 @@ function proccessFile(
     excludeSearchContent?: any[],
     availableServices?: any[]
 ) {
-    console.log(`proccess ${cloudFormationFilePath}`);
+    // console.log(`proccess ${cloudFormationFilePath}`);
     let response: Response = {
         data: [],
         message: ""
@@ -54,7 +54,7 @@ function proccessFile(
     try {
         const cloudFormationContent = parseYamlFromPath(cloudFormationFilePath);
         const findResult = find(cloudFormationContent, includeSearchContent, excludeSearchContent, availableServices);
-        console.log(`Parse file: ${cloudFormationFilePath}`);
+        // console.log(`Parse file: ${cloudFormationFilePath}`);
         if (findResult.length > 0) {
             response.data.push(...findResult);
         }
@@ -73,7 +73,7 @@ function proccessDirectory(
     availableServices?: any[],
     additionalContentFromFilePath?: string
 ) {
-    console.log(`proccessDirectory ${cloudFormationDirPath}`);
+    // console.log(`proccessDirectory ${cloudFormationDirPath}`);
     const path = require('path');
     const files = fs.readdirSync(cloudFormationDirPath);
     const arrayDirectoryResult = [];
@@ -90,7 +90,7 @@ function proccessDirectory(
 }
 
 export async function proccessFromConfigFile(filePath: string) {
-    console.log(`proccessFromConfigFile ${filePath}`);
+    // console.log(`proccessFromConfigFile ${filePath}`);
     try {
         const config = parseYamlFromPath(`${homedir}/.tnc-cup.config.json`);
 
@@ -124,9 +124,9 @@ export async function proccessFromConfigFile(filePath: string) {
 
         if (availableServices && availableServices.data) {
             const c: Currency = { code: `${config.currency}` };
-            console.log(`url: ${baseUrl}/${config.api.templateEndpoint}`);
+            //console.log(`url: ${baseUrl}/${config.api.templateEndpoint}`);
             // console.log(`header: ${JSON.stringify(config.api.header)}`);
-            console.log(`body: ${constructTemplateBodyApi(arrayResult, c, config.budget, config.region)}`);
+            //console.log(`body: ${constructTemplateBodyApi(arrayResult, c, config.budget, config.region)}`);
             // console.log(`data: ${JSON.stringify(arrayResult, null, 2)}`);
 
             const apiReturn = await Axios.post(
@@ -137,7 +137,8 @@ export async function proccessFromConfigFile(filePath: string) {
                 }
             );
 
-            console.log(`returned data: ${JSON.stringify(apiReturn.data, null, 2)}`);
+            // TODO: json param output only
+            //console.log(`returned data: ${JSON.stringify(apiReturn.data, null, 2)}`);
 
             const table = new Table({
                 head: [colors.white("Service"), colors.white("Group"), colors.white("Description"), colors.white("Price")],
@@ -209,6 +210,7 @@ export async function proccessFromConfigFile(filePath: string) {
 
                 a.push(e);
             });
+            console.log('\n');
             console.log(table.toString());
 
             if (budgetResponse !== null) {

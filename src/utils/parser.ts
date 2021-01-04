@@ -5,7 +5,7 @@ import { Currency } from '../models/currency';
 import { TemplateBody } from '../models/template-body';
 
 const parseYamlFromPath = (path: string) => {
-  console.log(`Parse yaml from path: ${path}`);
+  // console.log(`Parse yaml from path: ${path}`);
   try {
     const content = yaml.safeLoad(fs.readFileSync(path).toString(), { schema: CLOUDFORMATION_SCHEMA });
     return content;
