@@ -21,7 +21,6 @@
     "cdk",
     "talkncloud"
   ],
-  "preferGlobal": true,
   "homepage": "https://cup.talkncloud.com",
   "repository": "https://github.com/talkncloud/tnc-cup-client",
   "devDependencies": {
