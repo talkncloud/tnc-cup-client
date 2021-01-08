@@ -34,9 +34,9 @@ jobs:
     - name: Create Release
       uses: actions/create-release@v1
       with:
-        tag_name: "v%s"
-        release_name: "v%s"
+        tag_name: ${{ github.ref }}
+        release_name: ${{ github.ref }}
         body: ${{steps.github_release.outputs.changelog}}
     # Both npm and version / changelog need these vars
       env:
-        GITHUB_TOKEN: ${{ secrets.GH_TOKEN }} # Leave this as is, it's automatically generated
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Leave this as is, it's automatically generated
