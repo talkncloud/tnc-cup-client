@@ -1,7 +1,7 @@
 {
   "name": "@talkncloud/tnc-cup",
   "description": "A cli tool for price AWS price estimation of cloudformation templates, json or yaml including CDK",
-  "version": "0.0.20",
+  "version": "0.0.21",
   "main": "dist/index.js",
   "scripts": {
     "test": "sh test.sh",

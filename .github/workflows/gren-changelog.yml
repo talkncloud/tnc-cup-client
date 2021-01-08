@@ -1,6 +1,6 @@
 name: "Release notes"
 
-on: [release]
+on:
   release: 
     types: [published]
 
