@@ -1,15 +1,13 @@
-name: Release notes
-
-on: [release]
-  types: [published]
-
-jobs:
-  publish:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - uses: lakto/gren-action@v2.0.0
-        env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-        with:
-          options: '--override'
+name: "GitHub Release Notes"
+description: "GitHub release notes and changelog generator using Gren"
+author: "Smartly.io and Kilchenmann"
+inputs:
+  options:  # Add the gren options here
+    description: 'Add the gren options here; e.g. " --override --prerelease"'
+    required: false
+    default: '--override'
+runs:
+  using: "docker"
+  image: "Dockerfile"
+  args:
+    - ${{ inputs.options }}
