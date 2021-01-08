@@ -2,7 +2,7 @@ name: npm-publish
 on:
   push:
     tags:
-      - "*"
+      - "v*"
     branches:
       - main # Change this to your default branch
 jobs:
@@ -42,3 +42,4 @@ jobs:
           PRE_RELEASE: "false"
           CHANGELOG_FILE: "CHANGELOG.md"
           ALLOW_EMPTY_CHANGELOG: "false"
+          ALLOW_TAG_PREFIX: "true"
