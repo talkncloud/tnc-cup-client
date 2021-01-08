@@ -1,24 +1,24 @@
-name: release-info
+name: 'change info'
 on:
   push:
     tags:
-      - "v*"
-    branches:
-      - main # Change this to your default branch
+      - '*'
 
-jobs:
-  release-upd:
-    name: release-info
+  release:
+    if: startsWith(github.ref, 'refs/tags/')
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-      - name: Release
-        uses: docker://antonyurchenko/git-release:latest
+      - name: Build Changelog
+        id: github_release
+        uses: mikepenz/release-changelog-builder-action@main
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          DRAFT_RELEASE: "false"
-          PRE_RELEASE: "false"
-          CHANGELOG_FILE: "CHANGELOG.md"
-          ALLOW_EMPTY_CHANGELOG: "false"
-          # ALLOW_TAG_PREFIX: "true"
+
+      - name: Create Release
+        uses: actions/create-release@v1
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: ${{ github.ref }}
+          body: ${{steps.github_release.outputs.changelog}}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
