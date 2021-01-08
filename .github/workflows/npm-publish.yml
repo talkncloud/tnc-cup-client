@@ -34,6 +34,7 @@ jobs:
       with:
         configuration: "changelog.config.json"
         outputFile: "CHANGELOG.md"
+        failOnError: "false"
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Leave this as is, it's automatically generated
     - name: Create Release
