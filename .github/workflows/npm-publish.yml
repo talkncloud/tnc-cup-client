@@ -2,7 +2,7 @@ name: npm-publish
 on:
   push:
     branches:
-      - main # Change this  to your default branch
+      - main # Change this to your default branch
 jobs:
   npm-publish:
     name: npm-publish
@@ -39,5 +39,4 @@ jobs:
         body: ${{steps.github_release.outputs.changelog}}
     # Both npm and version / changelog need these vars
       env: # More info about the environment variables in the README
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Leave this as is, it's automatically generated
-        NPM_AUTH_TOKEN: ${{ secrets.NPM_PUBLISH_SECRET }} # You need to set this in your repo settings
+        GITHUB_TOKEN: ${{ secrets.GH_TOKEN }} # Leave this as is, it's automatically generated
