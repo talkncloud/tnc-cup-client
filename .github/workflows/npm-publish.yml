@@ -32,9 +32,9 @@ jobs:
     name: release-info
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: lakto/gren-action@v2.0.0
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Release
+        uses: docker://antonyurchenko/git-release:latest
         env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-        with:
-          options: 'release --override'
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
