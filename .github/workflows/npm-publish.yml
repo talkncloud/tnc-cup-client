@@ -38,5 +38,5 @@ jobs:
         release_name: "v%s"
         body: ${{steps.github_release.outputs.changelog}}
     # Both npm and version / changelog need these vars
-      env: # More info about the environment variables in the README
+      env:
         GITHUB_TOKEN: ${{ secrets.GH_TOKEN }} # Leave this as is, it's automatically generated
