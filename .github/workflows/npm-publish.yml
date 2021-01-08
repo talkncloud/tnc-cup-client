@@ -31,13 +31,16 @@ jobs:
     - name: Build Changelog
       id: github_release
       uses: mikepenz/release-changelog-builder-action@main
+      with:
+        configuration: "changelog.config.json"
+        outputFile: "CHANGELOG.md"
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Leave this as is, it's automatically generated
     - name: Create Release
       uses: actions/create-release@v1
       with:
-        tag_name: ${{ github.ref }}
-        release_name: ${{ github.ref }}
+        tag_name: "v%s"
+        release_name: "v%s"
         body: ${{steps.github_release.outputs.changelog}}
     # Both npm and version / changelog need these vars
       env:
