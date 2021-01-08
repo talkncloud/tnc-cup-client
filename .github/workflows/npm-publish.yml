@@ -23,25 +23,17 @@ jobs:
         workspace: "."
         publish_command: "yarn"
         publish_args: "--non-interactive"
+    # Changelog this
+    - name: Build Changelog
+      id: github_release
+      uses: mikepenz/release-changelog-builder-action@main
+    - name: Create Release
+      uses: actions/create-release@v1
+      with:
+        tag_name: "v%s"
+        release_name: "v%s"
+        body: ${{steps.github_release.outputs.changelog}}
+    # Both npm and version / changelog need these vars
       env: # More info about the environment variables in the README
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Leave this as is, it's automatically generated
         NPM_AUTH_TOKEN: ${{ secrets.NPM_PUBLISH_SECRET }} # You need to set this in your repo settings
-
-  release:
-    # if: startsWith(github.ref, 'refs/tags/')
-    runs-on: ubuntu-latest
-    steps:
-      - name: Build Changelog
-        id: github_release
-        uses: mikepenz/release-changelog-builder-action@main
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Create Release
-        uses: actions/create-release@v1
-        with:
-          tag_name: "v%s"
-          release_name: "v%s"
-          body: ${{steps.github_release.outputs.changelog}}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
