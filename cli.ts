@@ -20,9 +20,20 @@ if (process.argv.length <= 2) {
 }
 
 let arrayResult: any[] = [];
+let shouldShowJson = false;
+let shouldOutputToFile = false;
+
 if (argv.t) {
   if (isFileExist(argv.t as string)) {
-    proccessFromConfigFile(argv.t as string).then(result => {
+    if (argv.j) {
+      shouldShowJson = true;
+    }
+
+    if (argv.o) {
+      shouldOutputToFile = true;
+    }
+
+    proccessFromConfigFile(argv.t as string, shouldShowJson, shouldOutputToFile).then(result => {
       arrayResult.push(result);
     }).catch(error => {
       console.log(`proccessFromConfigFile argv returns error ${error.stack}`);
@@ -38,8 +49,10 @@ if (argv.t) {
     const path = require('path');
     fs.copyFileSync(path.resolve(__dirname, '../config.example.json'), homedir + '/.tnc-cup.config.example.json');
   } else {
-
-    proccessFromConfigFile(homedir + '/.tnc-cup.config.json').then(result => {
+    if (argv.j) {
+      shouldShowJson = true;
+    }
+    proccessFromConfigFile(homedir + '/.tnc-cup.config.json', shouldShowJson, shouldOutputToFile).then(result => {
       arrayResult.push(result);
     }).catch(error => {
       console.log(`proccessFromConfigFile .tnc-cup.config.json returns error ${error.stack}`);

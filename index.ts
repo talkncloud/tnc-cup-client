@@ -90,7 +90,7 @@ function proccessDirectory(
     return arrayDirectoryResult;
 }
 
-export async function proccessFromConfigFile(filePath: string) {
+export async function proccessFromConfigFile(filePath: string, shouldShowJson: boolean, shouldOutputToFile: boolean) {
     // console.log(`proccessFromConfigFile ${filePath}`);
     try {
         const config = parseYamlFromPath(`${homedir}/.tnc-cup.config.json`);
@@ -138,8 +138,9 @@ export async function proccessFromConfigFile(filePath: string) {
                 }
             );
 
-            // TODO: json param output only
-            //console.log(`returned data: ${JSON.stringify(apiReturn.data, null, 2)}`);
+            if (shouldShowJson) {
+                console.log(`returned data: ${JSON.stringify(apiReturn.data, null, 2)}`);
+            }
 
             const table = new Table({
                 head: [colors.white("Service"), colors.white("Group"), colors.white("Description"), colors.white("Price")],
