@@ -64,8 +64,11 @@ Go to [tnc-cup](https://cup.talkncloud.com/signup) to register, once registered 
 
 ## Cli parameters ##
 
-1. -c = generate configuration file
-2. -t = template file to parse
+| Param | Description |
+|---|---|
+| -c | generate local config file |
+| -t | cloudformation template to process |
+| -j | output as json to stdout |
 
 ## Example ##
 
