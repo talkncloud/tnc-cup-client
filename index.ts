@@ -2,6 +2,7 @@ import fs from 'fs';
 import Axios from 'axios';
 import { Response } from './src/models/response';
 import { Service } from './src/models/service-content';
+import { ServiceResponse } from './src/models/service-response';
 import { BudgetStatus } from './src/models/budget-status';
 import { BudgetResponse } from './src/models/budget-response';
 import { parseYamlFromPath, constructTemplateBodyApi } from './src/utils/parser';
@@ -13,10 +14,15 @@ import { TERMINATE_ON_ERROR } from './src/utils/constants';
 const homedir = require('os').homedir();
 
 function find(content: any, includeSearchContent: any[], excludeSearchContent?: any[], availableServices?: any[]) {
-    // console.log(`find`);
+    console.log(`find content: ${JSON.stringify(content, null, 2)}`);
+    console.log(`find includeSearchContent: ${JSON.stringify(includeSearchContent)}`);
+    console.log(`find excludeSearchContent: ${JSON.stringify(excludeSearchContent)}`);
+    console.log(`find availableServices: ${JSON.stringify(availableServices)}`);
     let arrayFindResult = [];
     for (let key of Object.keys(content['Resources'])) {
         const service = content['Resources'][key]['Type'];
+        // console.log(`find service: ${JSON.stringify(service, null, 2)}`);
+        console.log(`find service: ${JSON.stringify(service)}`);
         if (excludeSearchContent !== undefined
             && excludeSearchContent.length > 0
             && excludeSearchContent.includes(service)) {
@@ -26,7 +32,7 @@ function find(content: any, includeSearchContent: any[], excludeSearchContent?: 
         if (availableServices === undefined || availableServices === null) {
             continue;
         } else {
-            if (availableServices.includes(service) &&
+            if (availableServices.some((s: ServiceResponse) => s.cloudformation === service) &&
                 (includeSearchContent === undefined
                     || includeSearchContent.length == 0
                     || (includeSearchContent !== undefined
@@ -47,7 +53,7 @@ function proccessFile(
     excludeSearchContent?: any[],
     availableServices?: any[]
 ) {
-    // console.log(`proccess ${cloudFormationFilePath}`);
+    console.log(`proccess ${cloudFormationFilePath}`);
     let response: Response = {
         data: [],
         message: ""
@@ -55,7 +61,7 @@ function proccessFile(
     try {
         const cloudFormationContent = parseYamlFromPath(cloudFormationFilePath);
         const findResult = find(cloudFormationContent, includeSearchContent, excludeSearchContent, availableServices);
-        // console.log(`Parse file: ${cloudFormationFilePath}`);
+        console.log(`Parse file: ${cloudFormationFilePath}`);
         if (findResult.length > 0) {
             response.data.push(...findResult);
         }
@@ -110,7 +116,7 @@ export async function proccessFromConfigFile(filePath: string, shouldShowJson: b
             headers: config.api.header
         });
         const services: any[] = Object.values(availableServices.data);
-        // console.log(`Available Services: ${JSON.stringify(services)}`);
+        console.log(`Available Services: ${JSON.stringify(services)}`);
 
         let arrayResult = [];
         arrayResult.push(...proccessFile(filePath, config.find.include, config.find.exclude, services).data);
@@ -125,10 +131,10 @@ export async function proccessFromConfigFile(filePath: string, shouldShowJson: b
 
         if (availableServices && availableServices.data) {
             const c: Currency = { code: `${config.currency}` };
-            //console.log(`url: ${baseUrl}/${config.api.templateEndpoint}`);
-            // console.log(`header: ${JSON.stringify(config.api.header)}`);
-            //console.log(`body: ${constructTemplateBodyApi(arrayResult, c, config.budget, config.region)}`);
-            // console.log(`data: ${JSON.stringify(arrayResult, null, 2)}`);
+            console.log(`url: ${baseUrl}/${config.api.templateEndpoint}`);
+            console.log(`header: ${JSON.stringify(config.api.header)}`);
+            console.log(`body: ${constructTemplateBodyApi(arrayResult, c, config.budget, config.region)}`);
+            console.log(`data: ${JSON.stringify(arrayResult, null, 2)}`);
 
             const apiReturn = await Axios.post(
                 `${baseUrl}/${config.api.templateEndpoint}`,
