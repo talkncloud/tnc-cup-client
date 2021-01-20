@@ -2,7 +2,9 @@ import fs from 'fs';
 import Axios from 'axios';
 import { Response } from './src/models/response';
 import { Service } from './src/models/service-content';
+import { ServiceItem } from './src/models/service-item';
 import { ServiceResponse } from './src/models/service-response';
+import { TotalCostResponse } from './src/models/total-cost-response';
 import { BudgetStatus } from './src/models/budget-status';
 import { BudgetResponse } from './src/models/budget-response';
 import { parseYamlFromPath, constructTemplateBodyApi } from './src/utils/parser';
@@ -22,7 +24,7 @@ function find(content: any, includeSearchContent: any[], excludeSearchContent?: 
     for (let key of Object.keys(content['Resources'])) {
         const service = content['Resources'][key]['Type'];
         // console.log(`find service: ${JSON.stringify(service, null, 2)}`);
-        console.log(`find service: ${JSON.stringify(service)}`);
+        // console.log(`find service: ${JSON.stringify(service)}`);
         if (excludeSearchContent !== undefined
             && excludeSearchContent.length > 0
             && excludeSearchContent.includes(service)) {
@@ -61,7 +63,7 @@ function proccessFile(
     try {
         const cloudFormationContent = parseYamlFromPath(cloudFormationFilePath);
         const findResult = find(cloudFormationContent, includeSearchContent, excludeSearchContent, availableServices);
-        console.log(`Parse file: ${cloudFormationFilePath}`);
+        // console.log(`Parse file: ${cloudFormationFilePath}`);
         if (findResult.length > 0) {
             response.data.push(...findResult);
         }
@@ -116,7 +118,7 @@ export async function proccessFromConfigFile(filePath: string, shouldShowJson: b
             headers: config.api.header
         });
         const services: any[] = Object.values(availableServices.data);
-        console.log(`Available Services: ${JSON.stringify(services)}`);
+        // console.log(`Available Services: ${JSON.stringify(services)}`);
 
         let arrayResult = [];
         arrayResult.push(...proccessFile(filePath, config.find.include, config.find.exclude, services).data);
@@ -136,7 +138,7 @@ export async function proccessFromConfigFile(filePath: string, shouldShowJson: b
             console.log(`body: ${constructTemplateBodyApi(arrayResult, c, config.budget, config.region)}`);
             console.log(`data: ${JSON.stringify(arrayResult, null, 2)}`);
 
-            const apiReturn = await Axios.post(
+            const apiReturn: Response = await Axios.post(
                 `${baseUrl}/${config.api.templateEndpoint}`,
                 constructTemplateBodyApi(arrayResult, c, config.budget, config.region),
                 {
@@ -149,8 +151,8 @@ export async function proccessFromConfigFile(filePath: string, shouldShowJson: b
             }
 
             const table = new Table({
-                head: [colors.white("Service"), colors.white("Group"), colors.white("Description"), colors.white("Price")],
-                colWidths: [15, 15, 90, 10],
+                head: [colors.white("Service"), colors.white("Group"), colors.white("Item"), colors.white("Description"), colors.white("Price")],
+                colWidths: [15, 15, 15, 90, 10],
                 wordWrap: true,
                 chars: {
                     'top': '═', 'top-mid': '╤', 'top-left': '╔', 'top-right': '╗'
@@ -162,61 +164,59 @@ export async function proccessFromConfigFile(filePath: string, shouldShowJson: b
 
             const a: any[] = [];
             let budgetResponse: BudgetResponse | null = null;
-            apiReturn.data.forEach((e: any | Service) => {
+            apiReturn.data.forEach((service: any | Service | BudgetResponse | TotalCostResponse) => {
                 // console.log(`e --> ${JSON.stringify(e)}`);
-                let group = '';
-                let service = '';
-                let description = '';
-                let price = '';
-                let isGroup = false;
-                for (var item in e) {
-                    // console.log(`Single Service: --> ${item}`);
-                    for (var key in e[item]) {
-                        // console.log(`key: --> ${key}`);
-                        if (key.match(/description|price/)) {
-                            service = item;
-                            if (key === 'description') description = e[item][key];
-                            if (key === 'price') price = e[item][key];
-                            isGroup = false;
-                        }
-                        else {
-                            isGroup = true;
-                            continue;
-                        }
-                    }
-                    if (!isGroup) {
-                        // console.log(`push: --> ${group} ${service} ${description} ${price}`);
-                        // Align description right if TOTAL
-                        if (item.includes('TOTAL ')) {
-                            table.push([colors.yellow(service), colors.yellow(group), { hAlign: 'right', content: colors.yellow(description) }, { hAlign: 'right', content: colors.yellow('$' + `${price}`) }]);
-                        } else {
-                            table.push([colors.green(service), colors.green(group), colors.green(description), { hAlign: 'right', content: colors.green('$' + `${price}`) }]);
-                        }
-                    } else {
-                        group = item;
-                        // console.log(`Group Service: --> ${item}`);
 
-                        if (item.toLowerCase().includes('budget')) {
-                            budgetResponse = e[item];
-                        } else {
-                            for (var subItem in e[item]) {
-                                // console.log(`single service key: --> ${subItem}`);
-                                service = subItem;
-                                for (var key in e[item][subItem]) {
-                                    // console.log(`subItem key key: --> ${key}`);
-                                    if (key.match(/description|price/)) {
-                                        if (key === 'description') description = e[item][subItem][key];
-                                        if (key === 'price') price = e[item][subItem][key];
-                                    }
+                let group: String = '';
+
+                for (var serviceKey in service) {
+                    // console.log(`Service Key: --> ${serviceKey}`);
+
+                    if (serviceKey.includes('TOTAL ')) {
+                        table.push([colors.yellow(serviceKey), colors.yellow(''), colors.yellow(''), { hAlign: 'right', content: colors.yellow((service[serviceKey] as TotalCostResponse).description) }, { hAlign: 'right', content: colors.yellow('$' + `${(service[serviceKey] as TotalCostResponse).price}`) }]);
+                        continue;
+                    }
+
+                    if (serviceKey.toLowerCase().includes('budget')) {
+                        budgetResponse = service[serviceKey];
+                        continue;
+                    }
+
+                    if (serviceKey.toLowerCase().includes('notimplemented')) {
+                        continue;
+                    }
+
+                    let serviceObj: Service = service[serviceKey];
+                    group = serviceObj.group;
+                    let serviceItems: any[] = serviceObj.items;
+
+                    if (serviceItems.length == 0) {
+                        /* Do nothing */
+                        continue;
+                    } else {
+
+                        serviceItems.forEach((serviceItemObj: any) => {
+                            let isSameServiceGroup = false;
+                            var serviceItemKey: string = '';
+                            // console.log(`Service Items length: --> ${serviceItems.length}`);
+                            for (serviceItemKey in serviceItemObj) {
+                                // console.log(`Service Item Key: --> ${serviceItemKey}`);
+                                let serviceItem: ServiceItem = serviceItemObj[serviceItemKey];
+                                if (!isSameServiceGroup) {
+                                    table.push([colors.green(serviceKey), colors.green(serviceObj.group), colors.green(serviceItemKey), colors.green(serviceItem.description), { hAlign: 'right', content: colors.green('$' + `${serviceItem.price}`) }]);
+                                } else {
+                                    table.push([colors.green(''), colors.green(''), colors.green(serviceItemKey), colors.green(serviceItem.description), { hAlign: 'right', content: colors.green('$' + `${serviceItem.price}`) }]);
                                 }
-                                // console.log(`push: --> ${group} ${service} ${description} ${price}`);
-                                table.push([colors.green(service), colors.green(group), colors.green(description), { hAlign: 'right', content: colors.green('$' + `${price}`) }]);
+
+                                isSameServiceGroup = true;
                             }
-                        }
+
+                        });
+
+                        continue;
                     }
                 }
 
-                a.push(e);
             });
             console.log('\n');
             console.log(table.toString());
@@ -248,28 +248,28 @@ export async function proccessFromConfigFile(filePath: string, shouldShowJson: b
         if (e.response) {
             if (e.response.status === 400) {
                 console.log(`\n\x1b[31mBad request.`);
-            }   
-                else if (e.response.status === 403) {
+            }
+            else if (e.response.status === 403) {
                 console.log(`\n\x1b[31mAccess denied: Please check your API key in config file.`);
             }
-                else if (e.response.status === 429) {
-                    console.log(`\n\x1b[31mToo many requests or limit reached.`);
+            else if (e.response.status === 429) {
+                console.log(`\n\x1b[31mToo many requests or limit reached.`);
             }
-                else if (e.response.status === 500) {
+            else if (e.response.status === 500) {
                 console.log(`\n\x1b[31mInternal error, please contact administrator.`);
             }
-                else if (e.response.status === 502) {
+            else if (e.response.status === 502) {
                 console.log(`\n\x1b[31mBad gateway, please contact administrator.`);
             }
-                else if (e.response.status === 503) {
+            else if (e.response.status === 503) {
                 console.log(`\n\x1b[31mUnavailable, please try again.`);
             }
-                else if (e.response.status === 504) {
+            else if (e.response.status === 504) {
                 console.log(`\n\x1b[31mTimeout, please try again.`);
             } else {
                 console.log(`\n\x1b[31m${e.message}`);
             }
-        
+
         } else {
             console.log(`\n\x1b[31m${e.message}`);
         }
