@@ -1,4 +1,6 @@
+import { ServiceItem } from './service-item';
+
 export interface Service {
-  description: string;
-  price: number;
+  group: string,
+  items: ServiceItem[]
 }
