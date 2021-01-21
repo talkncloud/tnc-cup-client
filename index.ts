@@ -16,10 +16,10 @@ import { TERMINATE_ON_ERROR } from './src/utils/constants';
 const homedir = require('os').homedir();
 
 function find(content: any, includeSearchContent: any[], excludeSearchContent?: any[], availableServices?: any[]) {
-    console.log(`find content: ${JSON.stringify(content, null, 2)}`);
-    console.log(`find includeSearchContent: ${JSON.stringify(includeSearchContent)}`);
-    console.log(`find excludeSearchContent: ${JSON.stringify(excludeSearchContent)}`);
-    console.log(`find availableServices: ${JSON.stringify(availableServices)}`);
+    // console.log(`find content: ${JSON.stringify(content, null, 2)}`);
+    // console.log(`find includeSearchContent: ${JSON.stringify(includeSearchContent)}`);
+    // console.log(`find excludeSearchContent: ${JSON.stringify(excludeSearchContent)}`);
+    // console.log(`find availableServices: ${JSON.stringify(availableServices)}`);
     let arrayFindResult = [];
     for (let key of Object.keys(content['Resources'])) {
         const service = content['Resources'][key]['Type'];
@@ -55,7 +55,7 @@ function proccessFile(
     excludeSearchContent?: any[],
     availableServices?: any[]
 ) {
-    console.log(`proccess ${cloudFormationFilePath}`);
+    // console.log(`proccess ${cloudFormationFilePath}`);
     let response: Response = {
         data: [],
         message: ""
@@ -133,10 +133,10 @@ export async function proccessFromConfigFile(filePath: string, shouldShowJson: b
 
         if (availableServices && availableServices.data) {
             const c: Currency = { code: `${config.currency}` };
-            console.log(`url: ${baseUrl}/${config.api.templateEndpoint}`);
-            console.log(`header: ${JSON.stringify(config.api.header)}`);
-            console.log(`body: ${constructTemplateBodyApi(arrayResult, c, config.budget, config.region)}`);
-            console.log(`data: ${JSON.stringify(arrayResult, null, 2)}`);
+            // console.log(`url: ${baseUrl}/${config.api.templateEndpoint}`);
+            // console.log(`header: ${JSON.stringify(config.api.header)}`);
+            // console.log(`body: ${constructTemplateBodyApi(arrayResult, c, config.budget, config.region)}`);
+            // console.log(`data: ${JSON.stringify(arrayResult, null, 2)}`);
 
             const apiReturn: Response = await Axios.post(
                 `${baseUrl}/${config.api.templateEndpoint}`,
