@@ -77,6 +77,10 @@ Go to [tnc-cup](https://cup.talkncloud.com/signup) to register, once registered 
 
 <img src="https://cup.talkncloud.com/img/tnc-cup-client-sample.f731cf0c.png" alt="alt text" title="example output" />
 
+## SUPPORTED SERVICES ##
+At this time we only support AWS. A list of supported AWS services can be found here:
+[services](https://github.com/talkncloud/tnc-cup-client/blob/main/AWS_SERVICES.md)
+
 
 ## API ##
 tnc-cup consists of a client that interfaces with the backend api. The backend api exposes a few endpoints and can be queried using typical curl tools. 
