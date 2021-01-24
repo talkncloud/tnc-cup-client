@@ -1,6 +1,6 @@
 Info                                                                                   
  tcup                                                                                  
-  date:   	1/24/2021, 8:31:05 PM                                                      
+  date:   	1/24/2021, 8:34:23 PM                                                      
   client: 	0.0.35                                                                     
   api:    	0.0.1                                                                      
                                                                                      
@@ -17,14 +17,14 @@ Cognito
   pool:   	Cognito User Pools us-east-1 tier 1 pricing                       	$40      
    units: 	5000 USER                                                                  
                                                                  	TOTAL (USD)         
-                                                                       	hour:	$20 USD  
-                                                                        	day:	$100 USD 
-                                                                      	month:	$1000 USD
+                                                                       	hour:	$20      
+                                                                        	day:	$100     
+                                                                      	month:	$1000    
                                                                                      
                                                                  	TOTAL (AUD)         
-                                                                       	hour:	$30 AUD  
-                                                                        	day:	$130 AUD 
-                                                                      	month:	$1200 AUD
+                                                                       	hour:	$30      
+                                                                        	day:	$130     
+                                                                      	month:	$1200    
 Budget: over budget by $100 AUD
 Budget: normal
 System: this is red
