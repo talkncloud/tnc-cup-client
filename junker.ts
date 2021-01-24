@@ -106,36 +106,36 @@ table.push(
 table.push(
     [{ colSpan: 3, content: 'DynamoDB' }],
     [{ colSpan: 3, content: ' tncdb38b2e622' }],
-    ['  rcu:', '\t$0.00013 per hour for units of read capacity beyond the free tier', '\t$166.5'],
+    ['  rcu:', '\t$0.00013 per hour for units of read capacity beyond the free tier', { hAlign: 'left', content: '\t$166.5'}],
     ['   units:', '\t1000 REQ', '\t'],
-    ['  wcu:', '\t$0.00065 per hour for units of write capacity beyond the free tier', '\t$13'],
+    ['  wcu:', '\t$0.00065 per hour for units of write capacity beyond the free tier', { hAlign: 'left', content: '\t$13'}],
     ['   units:', '\t1000 REQ', '\t'],
-    ['  storage:', '\t$0.25 per GB-Month of storage used beyond first 25 free GB-Months', '\t$2.6'],
+    ['  storage:', '\t$0.25 per GB-Month of storage used beyond first 25 free GB-Months', { hAlign: 'left', content: '\t$2.6'}],
     ['   units:', '\t50 GB', '\t'],
 );
 
 table.push(
     [{ colSpan: 3, content: 'Cognito' }],    
     [{ colSpan: 3, content: ' tncup' }],
-    ['  pool:', '\tCognito User Pools us-east-1 tier 1 pricing', '\t$40'],
+    ['  pool:', '\tCognito User Pools us-east-1 tier 1 pricing', { hAlign: 'left', content: '\t$40'}],
     ['   units:', '\t5000 USER', '\t']
 );
 
 table.push(
-    ['\t', { hAlign: 'right', content: '\tTOTAL (USD)' }, '\t'], // Note: the /t in content
-    ['\t', { hAlign: 'right', content: '\thour:' }, { hAlign: 'right', content: '\t$20 USD'}], // Note: the /t in content
-    ['\t', { hAlign: 'right', content: '\tday:' }, { hAlign: 'right', content: '\t$100 USD'}], // Note: the /t in content
-    ['\t', { hAlign: 'right', content: '\tmonth:' }, { hAlign: 'right', content: '\t$1000 USD'}], // Note: the /t in content
+    ['\t', { hAlign: 'right', content: '\tTOTAL (USD)' }, { hAlign: 'left', content: '\t'}], // Note: the /t in content
+    ['\t', { hAlign: 'right', content: '\thour:' }, { hAlign: 'left', content: '\t$20 USD'}], // Note: the /t in content
+    ['\t', { hAlign: 'right', content: '\tday:' }, { hAlign: 'left', content: '\t$100 USD'}], // Note: the /t in content
+    ['\t', { hAlign: 'right', content: '\tmonth:' }, { hAlign: 'left', content: '\t$1000 USD'}], // Note: the /t in content
     [ '\t', '\t', '\t'] // needs to be /t otherwise throws off formatting
 );
 
 // If currency conversion
 // TODO: API to provide hour, day, month
 table.push(    
-    ['\t', { hAlign: 'right', content: '\tTOTAL (AUD)' }, '\t'], // Note: the /t in content
-    ['\t', { hAlign: 'right', content: '\thour:' }, { hAlign: 'right', content: '\t$30 AUD'}], // Note: the /t in content
-    ['\t', { hAlign: 'right', content: '\tday:' }, { hAlign: 'right', content: '\t$130 AUD'}], // Note: the /t in content
-    ['\t', { hAlign: 'right', content: '\tmonth:' }, { hAlign: 'right', content: '\t$1200 AUD'}], // Note: the /t in content
+    ['\t', { hAlign: 'right', content: '\tTOTAL (AUD)' }, { hAlign: 'left', content: '\t'}], // Note: the /t in content
+    ['\t', { hAlign: 'right', content: '\thour:' }, { hAlign: 'left', content: '\t$30 AUD'}], // Note: the /t in content
+    ['\t', { hAlign: 'right', content: '\tday:' }, { hAlign: 'left', content: '\t$130 AUD'}], // Note: the /t in content
+    ['\t', { hAlign: 'right', content: '\tmonth:' }, { hAlign: 'left', content: '\t$1200 AUD'}], // Note: the /t in content
 );
 
 // NOTE: get file name, added .tcup.txt
