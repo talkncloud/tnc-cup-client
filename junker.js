@@ -62,18 +62,18 @@ table.push([{ colSpan: 3, content: 'Info' }], [{ colSpan: 3, content: ' tcup' }]
 );
 table.push([{ colSpan: 3, content: 'DynamoDB' }], [{ colSpan: 3, content: ' tncdb38b2e622' }], ['  rcu:', '\t$0.00013 per hour for units of read capacity beyond the free tier', '\t$166.5'], ['   units:', '\t1000 REQ', '\t'], ['  wcu:', '\t$0.00065 per hour for units of write capacity beyond the free tier', '\t$13'], ['   units:', '\t1000 REQ', '\t'], ['  storage:', '\t$0.25 per GB-Month of storage used beyond first 25 free GB-Months', '\t$2.6'], ['   units:', '\t50 GB', '\t']);
 table.push([{ colSpan: 3, content: 'Cognito' }], [{ colSpan: 3, content: ' tncup' }], ['  pool:', '\tCognito User Pools us-east-1 tier 1 pricing', '\t$40'], ['   units:', '\t5000 USER', '\t']);
-table.push(['\t', { hAlign: 'right', content: 'TOTAL (USD)' }, '\t'], // Note: the /t in content
-['\t', { hAlign: 'right', content: 'hour:' }, '\t$20 USD'], // Note: the /t in content
-['\t', { hAlign: 'right', content: 'day:' }, '\t$100 USD'], // Note: the /t in content
-['\t', { hAlign: 'right', content: 'month:' }, '\t$1000 USD'], // Note: the /t in content
+table.push(['\t', { hAlign: 'right', content: '\tTOTAL (USD)' }, '\t'], // Note: the /t in content
+['\t', { hAlign: 'right', content: '\thour:' }, { hAlign: 'right', content: '\t$20 USD' }], // Note: the /t in content
+['\t', { hAlign: 'right', content: '\tday:' }, { hAlign: 'right', content: '\t$100 USD' }], // Note: the /t in content
+['\t', { hAlign: 'right', content: '\tmonth:' }, { hAlign: 'right', content: '\t$1000 USD' }], // Note: the /t in content
 ['\t', '\t', '\t'] // needs to be /t otherwise throws off formatting
 );
 // If currency conversion
 // TODO: API to provide hour, day, month
-table.push(['\t', { hAlign: 'right', content: 'TOTAL (AUD)' }, '\t'], // Note: the /t in content
-['\t', { hAlign: 'right', content: 'hour:' }, '\t$30 AUD'], // Note: the /t in content
-['\t', { hAlign: 'right', content: 'day:' }, '\t$130 AUD'], // Note: the /t in content
-['\t', { hAlign: 'right', content: 'month:' }, '\t$1200 AUD']);
+table.push(['\t', { hAlign: 'right', content: '\tTOTAL (AUD)' }, '\t'], // Note: the /t in content
+['\t', { hAlign: 'right', content: '\thour:' }, { hAlign: 'right', content: '\t$30 AUD' }], // Note: the /t in content
+['\t', { hAlign: 'right', content: '\tday:' }, { hAlign: 'right', content: '\t$130 AUD' }], // Note: the /t in content
+['\t', { hAlign: 'right', content: '\tmonth:' }, { hAlign: 'right', content: '\t$1200 AUD' }]);
 // NOTE: get file name, added .tcup.txt
 var outFile = fs.createWriteStream('Appsync_Cognito_Waf.tcup.txt', { flags: 'w' }); // plain text, overwrite
 var processOut = process.stdout;

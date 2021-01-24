@@ -122,20 +122,20 @@ table.push(
 );
 
 table.push(
-    ['\t', { hAlign: 'right', content: 'TOTAL (USD)' }, '\t'], // Note: the /t in content
-    ['\t', { hAlign: 'right', content: 'hour:' }, '\t$20 USD'], // Note: the /t in content
-    ['\t', { hAlign: 'right', content: 'day:' }, '\t$100 USD'], // Note: the /t in content
-    ['\t', { hAlign: 'right', content: 'month:' }, '\t$1000 USD'], // Note: the /t in content
+    ['\t', { hAlign: 'right', content: '\tTOTAL (USD)' }, '\t'], // Note: the /t in content
+    ['\t', { hAlign: 'right', content: '\thour:' }, { hAlign: 'right', content: '\t$20 USD'}], // Note: the /t in content
+    ['\t', { hAlign: 'right', content: '\tday:' }, { hAlign: 'right', content: '\t$100 USD'}], // Note: the /t in content
+    ['\t', { hAlign: 'right', content: '\tmonth:' }, { hAlign: 'right', content: '\t$1000 USD'}], // Note: the /t in content
     [ '\t', '\t', '\t'] // needs to be /t otherwise throws off formatting
 );
 
 // If currency conversion
 // TODO: API to provide hour, day, month
 table.push(    
-    ['\t', { hAlign: 'right', content: 'TOTAL (AUD)' }, '\t'], // Note: the /t in content
-    ['\t', { hAlign: 'right', content: 'hour:' }, '\t$30 AUD'], // Note: the /t in content
-    ['\t', { hAlign: 'right', content: 'day:' }, '\t$130 AUD'], // Note: the /t in content
-    ['\t', { hAlign: 'right', content: 'month:' }, '\t$1200 AUD'], // Note: the /t in content
+    ['\t', { hAlign: 'right', content: '\tTOTAL (AUD)' }, '\t'], // Note: the /t in content
+    ['\t', { hAlign: 'right', content: '\thour:' }, { hAlign: 'right', content: '\t$30 AUD'}], // Note: the /t in content
+    ['\t', { hAlign: 'right', content: '\tday:' }, { hAlign: 'right', content: '\t$130 AUD'}], // Note: the /t in content
+    ['\t', { hAlign: 'right', content: '\tmonth:' }, { hAlign: 'right', content: '\t$1200 AUD'}], // Note: the /t in content
 );
 
 // NOTE: get file name, added .tcup.txt
