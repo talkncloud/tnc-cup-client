@@ -9,7 +9,7 @@ import { BudgetStatus } from './src/models/budget-status';
 import { BudgetResponse } from './src/models/budget-response';
 import { parseYamlFromPath, constructTemplateBodyApi } from './src/utils/parser';
 import Table from "cli-table3"
-import colors from "colors";
+import chalk from 'chalk';
 import { Currency } from './src/models/currency';
 import { terminateApp } from './src/utils/app';
 import { TERMINATE_ON_ERROR } from './src/utils/constants';
@@ -151,21 +151,22 @@ export async function proccessFromConfigFile(filePath: string, shouldShowJson: b
             }
 
             const table = new Table({
-                head: [colors.white("Service"), colors.white("Group"), colors.white("Item"), colors.white("Description"), colors.white("Price")],
-                colWidths: [15, 15, 15, 90, 10],
                 wordWrap: true,
                 chars: {
-                    'top': '═', 'top-mid': '╤', 'top-left': '╔', 'top-right': '╗'
-                    , 'bottom': '═', 'bottom-mid': '╧', 'bottom-left': '╚', 'bottom-right': '╝'
-                    , 'left': '║', 'left-mid': '╟', 'mid': '─', 'mid-mid': '┼'
-                    , 'right': '║', 'right-mid': '╢', 'middle': '│'
+                        'top': '' , 'top-mid': '' , 'top-left': '' , 'top-right': ''
+                        , 'bottom': '' , 'bottom-mid': '' , 'bottom-left': '' , 'bottom-right': ''
+                        , 'left': '' , 'left-mid': '' , 'mid': '' , 'mid-mid': ''
+                        , 'right': '' , 'right-mid': '' , 'middle': '' 
+                    },
+                style: {
+                    'padding-left': 0, 'padding-right': 0
                 }
-            })
+            });
 
             const a: any[] = [];
             let budgetResponse: BudgetResponse | null = null;
             apiReturn.data.forEach((service: any | Service | BudgetResponse | TotalCostResponse) => {
-                // console.log(`e --> ${JSON.stringify(e)}`);
+                // console.log(`service --> ${JSON.stringify(service)}`);
 
                 let group: String = '';
 
@@ -173,7 +174,10 @@ export async function proccessFromConfigFile(filePath: string, shouldShowJson: b
                     // console.log(`Service Key: --> ${serviceKey}`);
 
                     if (serviceKey.includes('TOTAL ')) {
-                        table.push([colors.yellow(serviceKey), colors.yellow(''), colors.yellow(''), { hAlign: 'right', content: colors.yellow((service[serviceKey] as TotalCostResponse).description) }, { hAlign: 'right', content: colors.yellow('$' + `${(service[serviceKey] as TotalCostResponse).price}`) }]);
+                        table.push(    
+                            ['\t', { hAlign: 'right', content: chalk.green.bold(serviceKey) }, '\t'], // Note: the /t in content
+                            ['\t', { hAlign: 'right', content: chalk.white.bold((service[serviceKey] as TotalCostResponse).description)}, chalk.green.bold('\t' + `${(service[serviceKey] as TotalCostResponse).price} ${config.currency}`)],
+                        );
                         continue;
                     }
 
@@ -188,6 +192,11 @@ export async function proccessFromConfigFile(filePath: string, shouldShowJson: b
 
                     let serviceObj: Service = service[serviceKey];
                     group = serviceObj.group;
+                    table.push(
+                        [{ colSpan: 3, content: chalk.bold.keyword('orange')(group) }],
+                        [{ colSpan: 3, content: chalk.keyword('grey')(` ${serviceKey}`) }],
+                    );
+
                     let serviceItems: any[] = serviceObj.items;
 
                     if (serviceItems.length == 0) {
@@ -196,19 +205,15 @@ export async function proccessFromConfigFile(filePath: string, shouldShowJson: b
                     } else {
 
                         serviceItems.forEach((serviceItemObj: any) => {
-                            let isSameServiceGroup = false;
                             var serviceItemKey: string = '';
                             // console.log(`Service Items length: --> ${serviceItems.length}`);
                             for (serviceItemKey in serviceItemObj) {
                                 // console.log(`Service Item Key: --> ${serviceItemKey}`);
                                 let serviceItem: ServiceItem = serviceItemObj[serviceItemKey];
-                                if (!isSameServiceGroup) {
-                                    table.push([colors.green(serviceKey), colors.green(serviceObj.group), colors.green(serviceItemKey), colors.green(serviceItem.description), { hAlign: 'right', content: colors.green('$' + `${serviceItem.price}`) }]);
-                                } else {
-                                    table.push([colors.green(''), colors.green(''), colors.green(serviceItemKey), colors.green(serviceItem.description), { hAlign: 'right', content: colors.green('$' + `${serviceItem.price}`) }]);
-                                }
-
-                                isSameServiceGroup = true;
+                                table.push(
+                                    [chalk.white.bold(`  ${serviceItemKey}`), '\t' + serviceItem.description, chalk.green.bold('\t' + `${serviceItem.price} ${config.currency}`)],
+                                    [chalk.grey('   units:'), chalk.grey('\t' + `${serviceItem.units} ${serviceItem.uom}`), '\t'],
+                                );
                             }
 
                         });
@@ -224,16 +229,16 @@ export async function proccessFromConfigFile(filePath: string, shouldShowJson: b
             if (budgetResponse !== null) {
                 switch ((budgetResponse as BudgetResponse).status) {
                     case BudgetStatus.NORMAL:
-                        console.log(`\n\x1b[32mBudget: ${(budgetResponse as BudgetResponse).message}`);
+                        console.log(`Budget: ${chalk.green((budgetResponse as BudgetResponse).message)}`);
                         break;
                     case BudgetStatus.WARNING:
-                        console.log(`\n\x1b[33mBudget: ${(budgetResponse as BudgetResponse).message}`);
+                        console.log(`Budget: ${chalk.yellow((budgetResponse as BudgetResponse).message)}`);
                         break;
                     case BudgetStatus.ERROR:
-                        console.log(`\n\x1b[31mBudget: ${(budgetResponse as BudgetResponse).message}`);
+                        console.log(`Budget: ${chalk.red((budgetResponse as BudgetResponse).message)}`);
                         break;
                     default:
-                        console.log(`\n\x1b[33mBudget: Unknown message.`);
+                        console.log(`Budget: ${chalk.red('Unknown message')}.`);
                         break;
                 }
             }
@@ -247,31 +252,31 @@ export async function proccessFromConfigFile(filePath: string, shouldShowJson: b
         // if the url is incorrect it won't have a response object
         if (e.response) {
             if (e.response.status === 400) {
-                console.log(`\n\x1b[31mBad request.`);
+                console.log(`\n${chalk.red('Bad request.')}`);
             }
             else if (e.response.status === 403) {
-                console.log(`\n\x1b[31mAccess denied: Please check your API key in config file.`);
+                console.log(`\n${chalk.red('Access denied: Please check your API key in config file.')}`);
             }
             else if (e.response.status === 429) {
-                console.log(`\n\x1b[31mToo many requests or limit reached.`);
+                console.log(`\n${chalk.red('Too many requests or limit reached.')}`);
             }
             else if (e.response.status === 500) {
-                console.log(`\n\x1b[31mInternal error, please contact administrator.`);
+                console.log(`\n${chalk.red('Internal error, please contact administrator.')}`);
             }
             else if (e.response.status === 502) {
-                console.log(`\n\x1b[31mBad gateway, please contact administrator.`);
+                console.log(`\n${chalk.red('Bad gateway, please contact administrator.')}`);
             }
             else if (e.response.status === 503) {
-                console.log(`\n\x1b[31mUnavailable, please try again.`);
+                console.log(`\n${chalk.red('Unavailable, please try again.')}`);
             }
             else if (e.response.status === 504) {
-                console.log(`\n\x1b[31mTimeout, please try again.`);
+                console.log(`\n${chalk.red('Timeout, please try again.')}`);
             } else {
-                console.log(`\n\x1b[31m${e.message}`);
+                console.log(`\n${chalk.red(e.message)}`);
             }
 
         } else {
-            console.log(`\n\x1b[31m${e.message}`);
+            console.log(`\n${chalk.red(e.message)}`);
         }
         terminateApp(TERMINATE_ON_ERROR);
     }
