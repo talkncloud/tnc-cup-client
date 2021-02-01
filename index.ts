@@ -161,7 +161,7 @@ export async function proccessFromConfigFile(filePath: string, shouldShowJson: b
                     , 'right': '', 'right-mid': '', 'middle': ''
                 },
                 style: {
-                    'padding-left': 0, 'padding-right': 0
+                    'padding-left': 2, 'padding-right': 2
                 }
             });
             const a: any[] = [];
@@ -176,10 +176,10 @@ export async function proccessFromConfigFile(filePath: string, shouldShowJson: b
 
                     if (serviceKey.includes('LY (')) {
                         if (serviceKey.includes('DAILY')) {
-                            table.push(['\t', '\t', '\t']) // spacer
+                            table.push([null, null, null]) // spacer
                         }
                         table.push(
-                            ['\t', { hAlign: 'right', content: chalk.white(serviceKey)}, chalk.green.bold('\t' + '$' + `${(service[serviceKey] as TotalCostResponse).price}`)], // Note: the /t in content
+                            [ null, { hAlign: 'right', content: chalk.white(serviceKey)}, chalk.green.bold('$' + `${(service[serviceKey] as TotalCostResponse).price}`)], // Note: the /t in content
                         );
                         continue;
                     }
@@ -201,7 +201,7 @@ export async function proccessFromConfigFile(filePath: string, shouldShowJson: b
                     group = serviceObj.group;
                     table.push(
                         [{ colSpan: 3, content: chalk.bold.keyword('orange')(group) }],
-                        [{ colSpan: 3, content: chalk.keyword('grey')(` ${serviceKey}`) }],
+                        [{ colSpan: 3, content: '[' + chalk.keyword('grey')(` ${serviceKey}`) + ' ]'}],
                     );
 
                     let serviceItems: any[] = serviceObj.items;
@@ -218,8 +218,8 @@ export async function proccessFromConfigFile(filePath: string, shouldShowJson: b
                                 // console.log(`Service Item Key: --> ${serviceItemKey}`);
                                 let serviceItem: ServiceItem = serviceItemObj[serviceItemKey];
                                 table.push(
-                                    [chalk.white.bold(`  ${serviceItemKey}`), '\t' + serviceItem.description, chalk.green.bold('\t' + '$' + `${serviceItem.price}`)],
-                                    [chalk.grey('   units:'), chalk.grey('\t' + `${serviceItem.units} ${serviceItem.uom}`), '\t'],
+                                    [chalk.grey('|- ') + chalk.white.bold(`${serviceItemKey}`), serviceItem.description, chalk.green.bold('$' + `${serviceItem.price}`)],
+                                    [chalk.grey('|-- units '), chalk.grey(`${serviceItem.units} ${serviceItem.uom}`), null],
                                 );
                             }
 
