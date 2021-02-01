@@ -261,8 +261,9 @@ export async function proccessFromConfigFile(filePath: string, shouldShowJson: b
                 const outFile = fs.createWriteStream(newFile, { flags: 'w' });
                 const processOut = process.stdout;
                 outFile.write(strip(table.toString()));
+                outFile.write('\n');
                 if (budgetMessage !== null) {
-                    outFile.write(`\n${strip(budgetMessage)}\n`);
+                    outFile.write(`${strip(budgetMessage)}`);
                 }
                 outFile.write('\n');
                 processOut.write('\n');
