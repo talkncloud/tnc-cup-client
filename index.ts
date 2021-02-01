@@ -173,10 +173,12 @@ export async function proccessFromConfigFile(filePath: string, shouldShowJson: b
                 for (var serviceKey in service) {
                     // console.log(`Service Key: --> ${serviceKey}`);
 
-                    if (serviceKey.includes('TOTAL ')) {
-                        table.push(    
-                            ['\t', { hAlign: 'right', content: chalk.green.bold(serviceKey) }, '\t'], // Note: the /t in content
-                            ['\t', { hAlign: 'right', content: chalk.white.bold((service[serviceKey] as TotalCostResponse).description)}, chalk.green.bold('\t' + `${(service[serviceKey] as TotalCostResponse).price} ${config.currency}`)],
+                    if (serviceKey.includes('LY (')) {
+                        if (serviceKey.includes('DAILY')) {
+                            table.push(['\t', '\t', '\t']) // spacer
+                        }
+                        table.push(   
+                            ['\t', { hAlign: 'right', content: chalk.white(serviceKey) }, chalk.green.bold('\t' + '$' + `${(service[serviceKey] as TotalCostResponse).price}`) ], // Note: the /t in content
                         );
                         continue;
                     }
@@ -190,6 +192,10 @@ export async function proccessFromConfigFile(filePath: string, shouldShowJson: b
                         continue;
                     }
 
+                    if (serviceKey.toLowerCase().includes('system')) {
+                        continue;
+                    }
+
                     let serviceObj: Service = service[serviceKey];
                     group = serviceObj.group;
                     table.push(
@@ -198,7 +204,7 @@ export async function proccessFromConfigFile(filePath: string, shouldShowJson: b
                     );
 
                     let serviceItems: any[] = serviceObj.items;
-
+                    
                     if (serviceItems.length == 0) {
                         /* Do nothing */
                         continue;
@@ -211,7 +217,7 @@ export async function proccessFromConfigFile(filePath: string, shouldShowJson: b
                                 // console.log(`Service Item Key: --> ${serviceItemKey}`);
                                 let serviceItem: ServiceItem = serviceItemObj[serviceItemKey];
                                 table.push(
-                                    [chalk.white.bold(`  ${serviceItemKey}`), '\t' + serviceItem.description, chalk.green.bold('\t' + `${serviceItem.price} ${config.currency}`)],
+                                    [chalk.white.bold(`  ${serviceItemKey}`), '\t' + serviceItem.description, chalk.green.bold('\t' + '$' + `${serviceItem.price}`)],
                                     [chalk.grey('   units:'), chalk.grey('\t' + `${serviceItem.units} ${serviceItem.uom}`), '\t'],
                                 );
                             }
