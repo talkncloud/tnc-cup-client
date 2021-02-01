@@ -52,6 +52,11 @@ if (argv.t) {
     if (argv.j) {
       shouldShowJson = true;
     }
+
+    if (argv.o) {
+      shouldOutputToFile = true;
+    }
+
     proccessFromConfigFile(homedir + '/.tnc-cup.config.json', shouldShowJson, shouldOutputToFile).then(result => {
       arrayResult.push(result);
     }).catch(error => {
