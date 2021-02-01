@@ -179,7 +179,7 @@ export async function proccessFromConfigFile(filePath: string, shouldShowJson: b
                             table.push(['\t', '\t', '\t']) // spacer
                         }
                         table.push(
-                            ['\t', { hAlign: 'right', content: chalk.white(serviceKey) }, chalk.green.bold('\t' + '$' + `${(service[serviceKey] as TotalCostResponse).price}`)], // Note: the /t in content
+                            ['\t', { hAlign: 'right', content: chalk.white(serviceKey)}, chalk.green.bold('\t' + '$' + `${(service[serviceKey] as TotalCostResponse).price}`)], // Note: the /t in content
                         );
                         continue;
                     }
@@ -262,7 +262,7 @@ export async function proccessFromConfigFile(filePath: string, shouldShowJson: b
                 const processOut = process.stdout;
                 outFile.write(strip(table.toString()));
                 if (budgetMessage !== null) {
-                    outFile.write(`${strip(budgetMessage)}\n`);
+                    outFile.write(`\n${strip(budgetMessage)}\n`);
                 }
                 outFile.write('\n');
                 processOut.write('\n');
