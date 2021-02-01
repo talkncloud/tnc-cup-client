@@ -37,7 +37,6 @@
     "chalk": "^4.1.0",
     "cli-table3": "^0.6.0",
     "cloudformation-js-yaml-schema": "^0.4.2",
-    "colors": "^1.4.0",
     "fs": "0.0.1-security",
     "js-yaml": "^3.14.0",
     "yargs": "^16.1.0"
