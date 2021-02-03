@@ -200,8 +200,9 @@ export async function proccessFromConfigFile(filePath: string, shouldShowJson: b
                     let serviceObj: Service = service[serviceKey];
                     group = serviceObj.group;
                     table.push(
-                        [{ colSpan: 3, content: chalk.bold.keyword('orange')(group) }],
-                        [{ colSpan: 3, content: '[' + chalk.keyword('grey')(` ${serviceKey}`) + ' ]'}],
+                        [{ colSpan: 3, content: '[ ' + chalk.bold.keyword('orange')(group) + ' ]'}],
+                        //[{ colSpan: 3, content: '[' + chalk.keyword('grey')(` ${serviceKey}`) + ' ]'}],
+                        [{ colSpan: 3, content: '|>' + chalk.keyword('grey')(` ${serviceKey}`)}],
                     );
 
                     let serviceItems: any[] = serviceObj.items;
