@@ -1,5 +1,7 @@
 import fs from 'fs';
 import Axios from 'axios';
+import Table from "cli-table3"
+import chalk from 'chalk';
 import { Response } from './src/models/response';
 import { Service } from './src/models/service-content';
 import { ServiceItem } from './src/models/service-item';
@@ -8,11 +10,11 @@ import { TotalCostResponse } from './src/models/total-cost-response';
 import { BudgetStatus } from './src/models/budget-status';
 import { BudgetResponse } from './src/models/budget-response';
 import { parseYamlFromPath, constructTemplateBodyApi } from './src/utils/parser';
-import Table from "cli-table3"
-import chalk from 'chalk';
 import { Currency } from './src/models/currency';
 import { terminateApp } from './src/utils/app';
+import { constructOutputFileInfo } from './src/utils/file';
 import { TERMINATE_ON_ERROR } from './src/utils/constants';
+import strip from 'strip-color';
 const homedir = require('os').homedir();
 
 function find(content: any, includeSearchContent: any[], excludeSearchContent?: any[], availableServices?: any[]) {
@@ -153,16 +155,15 @@ export async function proccessFromConfigFile(filePath: string, shouldShowJson: b
             const table = new Table({
                 wordWrap: true,
                 chars: {
-                        'top': '' , 'top-mid': '' , 'top-left': '' , 'top-right': ''
-                        , 'bottom': '' , 'bottom-mid': '' , 'bottom-left': '' , 'bottom-right': ''
-                        , 'left': '' , 'left-mid': '' , 'mid': '' , 'mid-mid': ''
-                        , 'right': '' , 'right-mid': '' , 'middle': '' 
-                    },
+                    'top': '', 'top-mid': '', 'top-left': '', 'top-right': ''
+                    , 'bottom': '', 'bottom-mid': '', 'bottom-left': '', 'bottom-right': ''
+                    , 'left': '', 'left-mid': '', 'mid': '', 'mid-mid': ''
+                    , 'right': '', 'right-mid': '', 'middle': ''
+                },
                 style: {
-                    'padding-left': 0, 'padding-right': 0
+                    'padding-left': 2, 'padding-right': 2
                 }
             });
-
             const a: any[] = [];
             let budgetResponse: BudgetResponse | null = null;
             apiReturn.data.forEach((service: any | Service | BudgetResponse | TotalCostResponse) => {
@@ -175,10 +176,10 @@ export async function proccessFromConfigFile(filePath: string, shouldShowJson: b
 
                     if (serviceKey.includes('LY (')) {
                         if (serviceKey.includes('DAILY')) {
-                            table.push(['\t', '\t', '\t']) // spacer
+                            table.push([null, null, null]) // spacer
                         }
-                        table.push(   
-                            ['\t', { hAlign: 'right', content: chalk.white(serviceKey) }, chalk.green.bold('\t' + '$' + `${(service[serviceKey] as TotalCostResponse).price}`) ], // Note: the /t in content
+                        table.push(
+                            [ null, { hAlign: 'right', content: chalk.white(serviceKey)}, chalk.green.bold('$' + `${(service[serviceKey] as TotalCostResponse).price}`)], // Note: the /t in content
                         );
                         continue;
                     }
@@ -199,12 +200,13 @@ export async function proccessFromConfigFile(filePath: string, shouldShowJson: b
                     let serviceObj: Service = service[serviceKey];
                     group = serviceObj.group;
                     table.push(
-                        [{ colSpan: 3, content: chalk.bold.keyword('orange')(group) }],
-                        [{ colSpan: 3, content: chalk.keyword('grey')(` ${serviceKey}`) }],
+                        [{ colSpan: 3, content: '[ ' + chalk.bold.keyword('orange')(group) + ' ]'}],
+                        //[{ colSpan: 3, content: '[' + chalk.keyword('grey')(` ${serviceKey}`) + ' ]'}],
+                        [{ colSpan: 3, content: '|>' + chalk.keyword('grey')(` ${serviceKey}`)}],
                     );
 
                     let serviceItems: any[] = serviceObj.items;
-                    
+
                     if (serviceItems.length == 0) {
                         /* Do nothing */
                         continue;
@@ -217,8 +219,8 @@ export async function proccessFromConfigFile(filePath: string, shouldShowJson: b
                                 // console.log(`Service Item Key: --> ${serviceItemKey}`);
                                 let serviceItem: ServiceItem = serviceItemObj[serviceItemKey];
                                 table.push(
-                                    [chalk.white.bold(`  ${serviceItemKey}`), '\t' + serviceItem.description, chalk.green.bold('\t' + '$' + `${serviceItem.price}`)],
-                                    [chalk.grey('   units:'), chalk.grey('\t' + `${serviceItem.units} ${serviceItem.uom}`), '\t'],
+                                    [chalk.grey('|- ') + chalk.white.bold(`${serviceItemKey}`), serviceItem.description, chalk.green.bold('$' + `${serviceItem.price}`)],
+                                    [chalk.grey('|-- units '), chalk.grey(`${serviceItem.units} ${serviceItem.uom}`), null],
                                 );
                             }
 
@@ -231,24 +233,43 @@ export async function proccessFromConfigFile(filePath: string, shouldShowJson: b
             });
             console.log('\n');
             console.log(table.toString());
+            let budgetMessage = null;
 
             if (budgetResponse !== null) {
                 switch ((budgetResponse as BudgetResponse).status) {
                     case BudgetStatus.NORMAL:
-                        console.log(`Budget: ${chalk.green((budgetResponse as BudgetResponse).message)}`);
+                        budgetMessage = `Budget: ${chalk.green((budgetResponse as BudgetResponse).message)}`;
+                        console.log(budgetMessage);
                         break;
                     case BudgetStatus.WARNING:
-                        console.log(`Budget: ${chalk.yellow((budgetResponse as BudgetResponse).message)}`);
+                        budgetMessage = `Budget: ${chalk.yellow((budgetResponse as BudgetResponse).message)}`;
+                        console.log(budgetMessage);
                         break;
                     case BudgetStatus.ERROR:
-                        console.log(`Budget: ${chalk.red((budgetResponse as BudgetResponse).message)}`);
+                        budgetMessage = `Budget: ${chalk.red((budgetResponse as BudgetResponse).message)}`;
+                        console.log(budgetMessage);
                         break;
                     default:
-                        console.log(`Budget: ${chalk.red('Unknown message')}.`);
+                        budgetMessage = `Budget: ${chalk.red('Unknown message')}.`;
+                        console.log(budgetMessage);
                         break;
                 }
             }
             console.log('\n');
+
+            if (shouldOutputToFile) {
+                const newFile = constructOutputFileInfo(filePath);
+                const outFile = fs.createWriteStream(newFile, { flags: 'w' });
+                const processOut = process.stdout;
+                outFile.write(strip(table.toString()));
+                outFile.write('\n');
+                if (budgetMessage !== null) {
+                    outFile.write(`${strip(budgetMessage)}`);
+                }
+                outFile.write('\n');
+                processOut.write('\n');
+            }
+
             return apiReturn;
         } else {
             return [];
