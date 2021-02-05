@@ -53,7 +53,7 @@ a new file will be created in $HOME/.config/tcup.json
 | find.include | array | `["AWS::CDK::Metadata"]` | if include empty or undefined, it will show all resources |
 | find.exclude | array | `["AWS::CDK::Metadata"]` | exclude will override include |
 | currency | string | `USD` | three letter country code to convery currency |
-| budget | float | `50.00` | budget allocated for this template |
+| budget | string | `50.00` | budget allocated for this template |
 | region | string | `ap-southeast-2` | AWS compatible region code |
 
 
