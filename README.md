@@ -1,4 +1,4 @@
-# [tnc-cup](https://cup.talkncloud.com)
+# [tcup](https://cup.talkncloud.com)
 
 [![GitHub license](https://img.shields.io/github/license/talkncloud/tnc-cup-client?color=blue&style=flat-square)](https://github.com/talkncloud/tnc-cup-client/blob/master/LICENSE)
 [![npm version](https://img.shields.io/npm/v/@talkncloud/tnc-cup?style=flat-square)](https://www.npmjs.com/package/@talkncloud/tnc-cup)
@@ -7,7 +7,7 @@
 
 **Note**: This is currently in **PREVIEW**. There will be bugs, we will fix the bugs. 
 
-talkncloud checkup (tnc-cup) has been developed by [talkncloud](https://www.talkncloud.com) and is a client for AWS price estimation. This cli client will parse cloudformation templates and post revelvant sections to the tnc-cup backend api to provide a price estimate.
+talkncloud checkup (tcup) has been developed by [talkncloud](https://www.talkncloud.com) and is a client for AWS price estimation. This cli client will parse cloudformation templates and post revelvant sections to the tcup backend api to provide a price estimate.
 
 Some key features:
   * Parse cloudformation & CDK (transpiled CF out)
@@ -21,22 +21,22 @@ Some key features:
 ## How to Install ##
 
 ```
-npm install -g @talkncloud/tnc-cup
+npm install -g @talkncloud/tcup
 ```
 
-tnc-cup can now be used from the terminal simply by running "tnc-cup"
+tcup can now be used from the terminal simply by running "tcup"
 
 ## Configuration ##
 
-The local configuration contains common configuration parameters required to use tnc-cup. The configuration file is located in the $HOME directory named ".tnc-cup.config.json".
+The local configuration contains common configuration parameters required to use tcup. The configuration file is located in the $HOME directory named ".config.json".
 
 Install the sample config file by running the following command
 
 ```
-tnc-cup -c
+tcup config
 ```
 
-a new file will be create in $HOME/.tnc-cup.config.example.json
+a new file will be created in $HOME/.config/tcup.json
 
 ## Configuration Parameters ##
 
@@ -52,7 +52,6 @@ a new file will be create in $HOME/.tnc-cup.config.example.json
 | find | object | |
 | find.include | array | `["AWS::CDK::Metadata"]` | if include empty or undefined, it will show all resources |
 | find.exclude | array | `["AWS::CDK::Metadata"]` | exclude will override include |
-| other | array | [] | placeholder for future implementation |
 | currency | string | `USD` | three letter country code to convery currency |
 | budget | float | `50.00` | budget allocated for this template |
 | region | string | `ap-southeast-2` | AWS compatible region code |
@@ -60,20 +59,36 @@ a new file will be create in $HOME/.tnc-cup.config.example.json
 
 ## API KEY ##
 
-Go to [tnc-cup](https://cup.talkncloud.com/signup) to register, once registered use the dashboard to generate an API KEY. Use this key to update your tnc-cup.config.json.
+Go to [tcup](https://cup.talkncloud.com/signup) to register, once registered use the dashboard to generate an API KEY. Use this key to update your config.json.
 
-## Cli parameters ##
+## Cli usage ##
 
-| Param | Description |
-|---|---|
-| -c | generate local config file |
-| -t | cloudformation template to process |
-| -j | output as json to stdout |
+```
+USAGE
+  $ tcup [COMMAND]
+
+COMMANDS
+  config  configure the local config file
+  cost    perform cloud cost estimation
+  help    display help for tcup
+```
+
+### cost usage
+```
+USAGE
+  $ tcup cost [OPTS]
+
+OPTIONS
+  -h, --help               show CLI help
+  -j, --json               prepend json api response to stdout
+  -o, --output             output results to plain text
+  -t, --template=template  (required) template to read
+```
 
 ## Example ##
 
 1. Navigate to your directory with the cloudformation template
-2. tnc-cup -t mytemplate.json | yaml
+2. tcup -t mytemplate.json || yaml
 
 <img src="https://cup.talkncloud.com/img/tnc-cup-client-sample.f731cf0c.png" alt="alt text" title="example output" />
 
@@ -83,7 +98,7 @@ At this time we only support AWS. A list of supported AWS services can be found 
 
 
 ## API ##
-tnc-cup consists of a client that interfaces with the backend api. The backend api exposes a few endpoints and can be queried using typical curl tools. 
+tcup consists of a client that interfaces with the backend api. The backend api exposes a few endpoints and can be queried using typical curl tools. 
 
 ### Authorization ###
 In general, to use the API you'll need an API key, the keys have typical rate limiting etc enabled. To use the endpoints below add the following to the header:
