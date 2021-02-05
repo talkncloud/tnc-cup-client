@@ -90,7 +90,39 @@ OPTIONS
 1. Navigate to your directory with the cloudformation template
 2. tcup -t mytemplate.json || yaml
 
-<img src="https://cup.talkncloud.com/img/tnc-cup-client-sample.f731cf0c.png" alt="alt text" title="example output" />
+```
+
+  [ DynamoDB ]                                                                                              
+  |> tncdb38B2E622                                                                                          
+  |- rcu        $0.00013 per hour for units of read capacity beyond the free tier                 $2.6    
+  |-- units     20000 RCU                                                                                 
+  |- storage    $0.25 per GB-Month of storage used beyond first 25 free GB-Months                 $166.5  
+  |-- units     666 GB                                                                                    
+  |- wcu        $0.00065 per hour for units of write capacity beyond the free tier                $13     
+  |-- units     20000 WCU                                                                                 
+  [ Cognito ]                                                                                               
+  |> tncup                                                                                                  
+  |- pool       Cognito User Pools us-east-1 tier 1 pricing                                       $27.5   
+  |-- units     5000 USER                                                                                 
+  [ AppSync ]                                                                                               
+  |> api                                                                                                    
+  |- api        $4 per million query and data modification operations in US East (N. Virginia)    $40     
+  |-- units     10000000 REQ                                                                              
+  [ WAFv2 ]                                                                                                 
+  |> waf                                                                                                    
+  |- req        $0.60 per million requests processed                                              $0.06   
+  |-- units     100000 REQ                                                                                
+  |- rule       $1.00 per rule created (prorated hourly)                                          $3      
+  |-- units     3 RULE                                                                                    
+  |- acl        $5.00 per web ACL created (prorated hourly)                                       $5      
+  |-- units     1 COUNT                                                                                   
+                                                                                                          
+                                                                                   DAILY (USD)    $9      
+                                                                                  WEEKLY (USD)    $64     
+                                                                                 MONTHLY (USD)    $258    
+Budget: over monthly budget by $157 (USD)
+
+```
 
 ## SUPPORTED SERVICES ##
 At this time we only support AWS. A list of supported AWS services can be found here:
