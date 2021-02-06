@@ -26,6 +26,7 @@ export default class Cost extends Command {
     help: flags.help({char: 'h'}),
     template: flags.string({char: 't', description: 'template to read', required: true}),
     json: flags.boolean({char: 'j', description: 'prepend json api response to stdout', dependsOn: ['template']}),
+    config: flags.boolean({char: 'c', description: 'generate cost configuration parameter file from template', dependsOn: ['template']}),
     output: flags.boolean({char: 'o', description: 'output results to plain text', dependsOn: ['template']}),
   }
 

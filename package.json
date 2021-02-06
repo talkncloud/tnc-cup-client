@@ -11,7 +11,7 @@
     "version": "oclif-dev readme && git add README.md"
   },
   "types": "lib/index.d.ts",
-  "author": "talkncloud",
+  "author": "Mike Jacobsson @talkncloud",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/talkncloud/tnc-cup-client/issues"
