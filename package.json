@@ -2,14 +2,16 @@
   "name": "@talkncloud/tnc-cup",
   "description": "A cli tool for price AWS price estimation of cloudformation templates, json or yaml including CDK",
   "version": "0.0.38",
-  "main": "dist/index.js",
+  "main": "lib/index.js",
   "scripts": {
-    "test": "sh test.sh",
-    "dev": "tsc && node dist/index.js",
-    "dev-launch": "tsc && node dist/cli.js -t testfiles/AppSyncWafStack.template.json",
-    "build:watch": "tsc -w"
+    "postpack": "rm -f oclif.manifest.json",
+    "posttest": "eslint . --ext .ts --config .eslintrc",
+    "prepack": "rm -rf lib && tsc -b && oclif-dev manifest && oclif-dev readme",
+    "test": "nyc --extension .ts mocha --forbid-only \"test/**/*.test.ts\"",
+    "version": "oclif-dev readme && git add README.md"
   },
-  "author": "talkncloud",
+  "types": "lib/index.d.ts",
+  "author": "Mike Jacobsson @talkncloud",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/talkncloud/tnc-cup-client/issues"
@@ -21,29 +23,64 @@
     "cdk",
     "talkncloud"
   ],
+  "engines": {
+    "node": ">=8.0.0"
+  },
+  "files": [
+    "/bin",
+    "/lib",
+    "/npm-shrinkwrap.json",
+    "/oclif.manifest.json"
+  ],
+  "oclif": {
+    "commands": "./lib/commands",
+    "bin": "tcup",
+    "plugins": [
+      "@oclif/plugin-help",
+      "@oclif/plugin-warn-if-update-available"
+    ],
+    "warn-if-update-available": {
+      "timeoutInDays": 7,
+      "message": "<%= config.name %> update available from <%= chalk.greenBright(config.version) %> to <%= chalk.greenBright(latest) %>.",
+      "registry": "https://www.npmjs.com/package/@talkncloud/tnc-cup"
+    }
+  },
   "homepage": "https://cup.talkncloud.com",
   "repository": "https://github.com/talkncloud/tnc-cup-client",
   "devDependencies": {
-    "@tsconfig/recommended": "^1.0.1",
-    "@types/node": "^14.14.2",
+    "@oclif/dev-cli": "^1.26.0",
+    "@oclif/test": "^1.2.8",
+    "@types/chai": "^4.2.14",
+    "@types/mocha": "^8.2.0",
+    "@types/node": "^14.14.25",
     "@types/strip-color": "^0.1.0",
-    "ts-node": "^9.0.0",
-    "typescript": "^4.0.3"
+    "chai": "^4.3.0",
+    "eslint": "^7.19.0",
+    "eslint-config-oclif": "^3.1.0",
+    "eslint-config-oclif-typescript": "^0.2.0",
+    "globby": "^11.0.2",
+    "mocha": "^8.2.1",
+    "nyc": "^15.1.0",
+    "ts-node": "^9.1.1",
+    "typescript": "^4.1.3"
   },
   "dependencies": {
-    "@types/axios": "^0.14.0",
-    "@types/js-yaml": "^3.12.5",
-    "@types/yargs": "^15.0.9",
-    "axios": "^0.21.0",
+    "@oclif/command": "^1.8.0",
+    "@oclif/config": "^1.17.0",
+    "@oclif/plugin-help": "^3.2.2",
+    "@oclif/plugin-warn-if-update-available": "^1.7.0",
+    "@types/js-yaml": "^4.0.0",
+    "axios": "^0.21.1",
     "chalk": "^4.1.0",
     "cli-table3": "^0.6.0",
     "cloudformation-js-yaml-schema": "^0.4.2",
-    "fs": "0.0.1-security",
-    "js-yaml": "^3.14.0",
+    "enquirer": "^2.3.6",
+    "fs-extra": "^9.1.0",
+    "js-yaml": "^4.0.0",
     "strip-color": "^0.1.0",
-    "yargs": "^16.1.0"
+    "tslib": "^2.1.0"
   },
   "bin": {
-    "tnc-cup": "dist/cli.js"
+    "tcup": "./bin/run"
   }
 }

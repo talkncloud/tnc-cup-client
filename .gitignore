@@ -8,3 +8,11 @@ package-lock.json
 package.tien.org
 junker_2.ts
 junker_2.js
+*-debug.log
+*-error.log
+/.nyc_output
+/dist
+/lib
+/tmp
+/yarn.lock
+node_modules
