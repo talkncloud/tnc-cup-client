@@ -4,6 +4,7 @@ import cli from 'cli-ux';
 import path from 'path';
 import chalk from 'chalk';
 import * as fs from 'fs-extra';
+import { ConfigFile } from '../models/config-file';
 
 //import { credentials } from '../utils/config/credentials';
 
@@ -27,12 +28,12 @@ export default class Config extends Command {
     //this.log('sign up for your API key ' + chalk.blue('https://cup.talkncloud.com/signup'))
     const signUpUrl = 'https://cup.talkncloud.com/signup'
 
-    const confirmRegistration = async (valid) => {
+    const confirmRegistration = async (valid: boolean) => {
       if (valid === false) {
         return 'you need an api key from registration'
       }
       return true;
-   };
+    };
 
    //const userConfig = await fs.readJSON(path.join(this.config.configDir, 'config.json'))
    const userConfig = path.join(this.config.configDir, 'config.json')
@@ -40,14 +41,14 @@ export default class Config extends Command {
   //  this.log('User config:')
   //  console.dir(userConfig)
 
-    const response = await prompt([
+    const questions = [
       {
         type: 'confirm',
         name: 'signup',
         message: 'Have you registered? [' + chalk.blue(signUpUrl) + ']',
         required: true,
         initial: 'Y',
-        validate: confirmRegistration
+        //validate: confirmRegistration
       },
       {
         type: 'input',
@@ -76,9 +77,10 @@ export default class Config extends Command {
         required: true
       }
 
-    ]).then((answer) => {
-      return answer      
-    })
+    ];
+
+      let response: ConfigFile
+      response  = await prompt(questions);
 
     // write the config file
     await fs.ensureDir(this.config.configDir);

@@ -18,6 +18,7 @@ import { constructOutputFileInfo } from '../utils/file';
 //import { TERMINATE_ON_ERROR } from './src/utils/constants';
 import strip from 'strip-color';
 import cli from 'cli-ux';
+import { string } from '@oclif/parser/lib/flags';
 
 export default class Cost extends Command {
   static description = 'perform cloud cost estimation'
@@ -36,12 +37,12 @@ export default class Cost extends Command {
   async run() {
     const {args, flags} = this.parse(Cost)
 
-    let config = path.join(this.config.configDir, 'config.json')
+    let configFile = path.join(this.config.configDir, 'config.json')
 
-    if (!(fs.existsSync(config))) {
+    if (!(fs.existsSync(configFile))) {
         this.error('config not found, please run config')
     } else {
-      config = parseYamlFromPath(config)
+        var config = parseYamlFromPath(configFile)
     }
 
     cli.action.start('crunching numbers')
