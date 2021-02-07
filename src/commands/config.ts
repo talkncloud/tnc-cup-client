@@ -86,7 +86,7 @@ export default class Config extends Command {
     await fs.ensureDir(this.config.configDir);
     await fs.writeJson(userConfig, {
       api: { 
-        "baseUrl": "https://apidev.talkncloud.com",
+        "baseUrl": "https://api.talkncloud.com",
         "version": "client",
         "header": { "x-api-key": response.apiKey },
         "templateEndpoint": "template",
