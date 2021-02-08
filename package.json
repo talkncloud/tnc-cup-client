@@ -1,7 +1,7 @@
 {
-  "name": "@talkncloud/tnc-cup",
+  "name": "@talkncloud/tcup",
   "description": "A cli tool for price AWS price estimation of cloudformation templates, json or yaml including CDK",
-  "version": "0.0.43",
+  "version": "0.0.44",
   "main": "lib/index.js",
   "scripts": {
     "postpack": "rm -f oclif.manifest.json",
@@ -42,7 +42,7 @@
     "warn-if-update-available": {
       "timeoutInDays": 7,
       "message": "<%= config.name %> update available from <%= chalk.greenBright(config.version) %> to <%= chalk.greenBright(latest) %>.",
-      "registry": "https://www.npmjs.com/package/@talkncloud/tnc-cup"
+      "registry": "https://www.npmjs.com/package/@talkncloud/tcup"
     }
   },
   "homepage": "https://cup.talkncloud.com",
