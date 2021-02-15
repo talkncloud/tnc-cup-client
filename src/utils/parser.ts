@@ -15,15 +15,18 @@ const parseYamlFromPath = (path: string) => {
   }
 }
 
-const constructTemplateBodyApi = (orgBody: any[], currency: Currency, budget: number, region: string) => {
+const constructTemplateBodyApi = (orgBody: any[], calcs: string, isCalcConfig: boolean, currency: Currency, budget: number, region: string) => {
   const a: TemplateBody[] = [];
   const body: TemplateBody = {
     file: orgBody,
+    calcs: isCalcConfig ? JSON.parse(calcs) : [],
     currency,
     budget,
     region
   };
   a.push(body);
+  console.log(`template body: ${JSON.stringify(a, null, 2)}`);
+
   return JSON.stringify(a);
 
 }
