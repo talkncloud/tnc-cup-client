@@ -25,7 +25,7 @@ const constructTemplateBodyApi = (orgBody: any[], calcs: string, isCalcConfig: b
     region
   };
   a.push(body);
-  console.log(`template body: ${JSON.stringify(a, null, 2)}`);
+  // console.log(`template body: ${JSON.stringify(a, null, 2)}`);
 
   return JSON.stringify(a);
 
