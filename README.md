@@ -79,6 +79,7 @@ USAGE
   $ tcup cost [OPTS]
 
 OPTIONS
+  -c, --config             generate cost configuration parameter file from template
   -h, --help               show CLI help
   -j, --json               prepend json api response to stdout
   -o, --output             output results to plain text
@@ -234,6 +235,11 @@ GET /currency
 | 502 | `BAD GATEWAY` |
 | 503 | `UNAVAILABLE` |
 | 504 | `TIMEOUT` |
+
+### Tuning additional cost calculations ###
+There are default pricing calculations that have been implemented, where possible items have been extracted from the template provided, but pricing is complicated there can be many options. The additional calculations are availabe at the /services endpoint within the calculations object. These are the available calculations. These options can considerably change your final price estimate.
+
+When you use the '-t myfile.json -c' switches a new calc file will be generated next to myfile.json. Update the values for the calculations in this file and they'll be sent the next time you run an estimate.
 
 ### Contributing ###
 
