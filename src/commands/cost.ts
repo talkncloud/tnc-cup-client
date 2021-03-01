@@ -171,6 +171,10 @@ export default class Cost extends Command {
                 outFile.close();
                 content = JSON.stringify(services, null, 2);
                 hasConfig = true;
+                cli.action.stop();
+                console.log('calc file created')
+                return
+                //this.exit(); // stop processing, simply config and exit
             }
 
             if (flags.json) {
