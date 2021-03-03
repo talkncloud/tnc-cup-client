@@ -7,22 +7,27 @@ import chalk from 'chalk';
 import { Response } from '../models/response';
 import { Service } from '../models/service-content';
 import { ServiceItem } from '../models/service-item';
-import { ServiceResponse } from '../models/service-response';
 import { TotalCostResponse } from '../models/total-cost-response';
 import { BudgetStatus } from '../models/budget-status';
 import { BudgetResponse } from '../models/budget-response';
 import { parseYamlFromPath, constructTemplateBodyApi } from '../utils/parser';
 import { Currency } from '../models/currency';
-//import { terminateApp } from '../utils/app';
-import { constructOutputFileInfo, isFileExist, readFileContent, constructFileInfo } from '../utils/file';
-//import { TERMINATE_ON_ERROR } from './src/utils/constants';
+import {
+    constructOutputFileInfo,
+    isFileExist,
+    readFileContent,
+    constructFileInfo,
+    proccessFile,
+    processFileForCalcs
+} from '../utils/file';
+
 import strip from 'strip-color';
 import cli from 'cli-ux';
 import { string } from '@oclif/parser/lib/flags';
 import { FileInfo } from '../models/file-info';
 
 export default class Cost extends Command {
-    static description = 'perform cloud cost estimation'
+    static description = 'perform cloud cost estimation';
 
     static flags = {
         help: flags.help({ char: 'h' }),
@@ -46,10 +51,12 @@ export default class Cost extends Command {
             var config = parseYamlFromPath(configFile)
         }
 
+        const templateFilePath = flags.template;
+
         var outFile: fs.WriteStream;
         var content: string = '';
         var hasConfig: boolean = false;
-        var newFile: FileInfo = constructFileInfo(flags.template, 'calcs', 'json');
+        var newFile: FileInfo = constructFileInfo(templateFilePath, 'calcs', 'json');
         if (isFileExist(newFile.fullPath)) {
             hasConfig = true;
             if (flags.config) {
@@ -61,89 +68,6 @@ export default class Cost extends Command {
         }
 
         cli.action.start('crunching numbers')
-
-        function find(content: any, includeSearchContent: any[], excludeSearchContent?: any[], availableServices?: any[]) {
-            // console.log(`find content: ${JSON.stringify(content, null, 2)}`);
-            // console.log(`find includeSearchContent: ${JSON.stringify(includeSearchContent)}`);
-            // console.log(`find excludeSearchContent: ${JSON.stringify(excludeSearchContent)}`);
-            // console.log(`find availableServices: ${JSON.stringify(availableServices)}`);
-            let arrayFindResult = [];
-            for (let key of Object.keys(content['Resources'])) {
-                const service = content['Resources'][key]['Type'];
-                // console.log(`find service: ${JSON.stringify(service, null, 2)}`);
-                // console.log(`find service: ${JSON.stringify(service)}`);
-                if (excludeSearchContent !== undefined
-                    && excludeSearchContent.length > 0
-                    && excludeSearchContent.includes(service)) {
-                    continue;
-                }
-
-                if (availableServices === undefined || availableServices === null) {
-                    continue;
-                } else {
-                    if (availableServices.some((s: ServiceResponse) => s.cloudformation === service) &&
-                        (includeSearchContent === undefined
-                            || includeSearchContent.length == 0
-                            || (includeSearchContent !== undefined
-                                && includeSearchContent.length > 0
-                                && includeSearchContent.includes(service)))) {
-                        arrayFindResult.push({
-                            [key]: content['Resources'][key]
-                        });
-                    }
-                }
-            }
-            return arrayFindResult;
-        }
-
-        function proccessFile(
-            cloudFormationFilePath: string,
-            includeSearchContent: any[],
-            excludeSearchContent?: any[],
-            availableServices?: any[]
-        ) {
-            // console.log(`proccess ${cloudFormationFilePath}`);
-            let response: Response = {
-                data: [],
-                message: ""
-            };
-            try {
-                const cloudFormationContent = parseYamlFromPath(cloudFormationFilePath);
-                const findResult = find(cloudFormationContent, includeSearchContent, excludeSearchContent, availableServices);
-                // console.log(`Parse file: ${cloudFormationFilePath}`);
-                if (findResult.length > 0) {
-                    response.data.push(...findResult);
-                }
-            } catch (e) {
-                console.log(`Process with error ${e.message}`);
-                response.message = "Not valid json or yaml file"
-                throw response;
-            }
-            return response;
-        }
-
-        function proccessDirectory(
-            cloudFormationDirPath: string,
-            includeSearchContent: any[],
-            excludeSearchContent?: any[],
-            availableServices?: any[],
-            additionalContentFromFilePath?: string
-        ) {
-            // console.log(`proccessDirectory ${cloudFormationDirPath}`);
-            const path = require('path');
-            const files = fs.readdirSync(cloudFormationDirPath);
-            const arrayDirectoryResult = [];
-            for (let file of files) {
-                try {
-                    const findResult = proccessFile(path.join(cloudFormationDirPath, file), includeSearchContent, excludeSearchContent, availableServices);
-                    arrayDirectoryResult.push(...findResult.data);
-                }
-                catch (e) {
-                    console.log(`Process Dir with error ${e.message}`);
-                }
-            }
-            return arrayDirectoryResult;
-        }
 
         // console.log(`proccessFromConfigFile ${filePath}`);
         try {
@@ -165,11 +89,15 @@ export default class Cost extends Command {
             });
 
             const services: any[] = Object.values(availableServices.data);
+            const finalCalcServices: any[] = [];
+            finalCalcServices.push(...processFileForCalcs(templateFilePath, services));
+            // console.log(`finalCalcServices --> ${JSON.stringify(finalCalcServices, null, 2)}`);
+
             if (flags.config) {
                 outFile = fs.createWriteStream(`${newFile.fullPath}`, { flags: 'w' });
-                outFile.write(`${JSON.stringify(services, null, 2)}`);
+                outFile.write(`${JSON.stringify(finalCalcServices, null, 2)}`);
                 outFile.close();
-                content = JSON.stringify(services, null, 2);
+                content = JSON.stringify(finalCalcServices, null, 2);
                 hasConfig = true;
                 cli.action.stop();
                 console.log('calc file created')
@@ -178,11 +106,11 @@ export default class Cost extends Command {
             }
 
             if (flags.json) {
-                console.log(`Available Services: ${JSON.stringify(services, null, 2)}`);
-            }            
+                console.log(`Available Services: ${JSON.stringify(finalCalcServices, null, 2)}`);
+            }
 
             let arrayResult = [];
-            arrayResult.push(...proccessFile(flags.template, config.find.include, config.find.exclude, services).data);
+            arrayResult.push(...proccessFile(templateFilePath, config.find.include, config.find.exclude, finalCalcServices).data);
             /*for (let directory of config.directories) {
                 arrayResult.push(...proccessDirectory(directory, config.find.include, config.find.exclude, services));
             }
@@ -317,7 +245,7 @@ export default class Cost extends Command {
                 console.log('\n');
 
                 if (flags.output) {
-                    const newFile = constructOutputFileInfo(flags.template);
+                    const newFile = constructOutputFileInfo(templateFilePath);
                     const outFile = fs.createWriteStream(newFile, { flags: 'w' });
                     const processOut = process.stdout;
                     outFile.write(strip(table.toString()));
