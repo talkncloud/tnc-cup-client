@@ -1,0 +1,876 @@
+{
+  "Transform": "AWS::Serverless-2016-10-31",
+  "Resources": {
+    "tncdb38B2E622": {
+      "Type": "AWS::DynamoDB::Table",
+      "Properties": {
+        "KeySchema": [
+          {
+            "AttributeName": "id",
+            "KeyType": "HASH"
+          }
+        ],
+        "AttributeDefinitions": [
+          {
+            "AttributeName": "id",
+            "AttributeType": "S"
+          }
+        ],
+        "ProvisionedThroughput": {
+          "ReadCapacityUnits": 5,
+          "WriteCapacityUnits": 5
+        }
+      },
+      "UpdateReplacePolicy": "Retain",
+      "DeletionPolicy": "Retain",
+      "Metadata": {
+        "aws:cdk:path": "AthenaAppsyncStack/tnc-db/Resource"
+      }
+    },
+    "bucketathresults1366061F": {
+      "Type": "AWS::S3::Bucket",
+      "Properties": {
+        "BucketEncryption": {
+          "ServerSideEncryptionConfiguration": [
+            {
+              "ServerSideEncryptionByDefault": {
+                "SSEAlgorithm": "AES256"
+              }
+            }
+          ]
+        },
+        "PublicAccessBlockConfiguration": {
+          "BlockPublicAcls": true,
+          "BlockPublicPolicy": true,
+          "IgnorePublicAcls": true,
+          "RestrictPublicBuckets": true
+        }
+      },
+      "UpdateReplacePolicy": "Retain",
+      "DeletionPolicy": "Retain",
+      "Metadata": {
+        "aws:cdk:path": "AthenaAppsyncStack/bucket-ath-results/Resource"
+      }
+    },
+    "bucketathcache3F13894D": {
+      "Type": "AWS::S3::Bucket",
+      "Properties": {
+        "BucketEncryption": {
+          "ServerSideEncryptionConfiguration": [
+            {
+              "ServerSideEncryptionByDefault": {
+                "SSEAlgorithm": "AES256"
+              }
+            }
+          ]
+        },
+        "PublicAccessBlockConfiguration": {
+          "BlockPublicAcls": true,
+          "BlockPublicPolicy": true,
+          "IgnorePublicAcls": true,
+          "RestrictPublicBuckets": true
+        }
+      },
+      "UpdateReplacePolicy": "Retain",
+      "DeletionPolicy": "Retain",
+      "Metadata": {
+        "aws:cdk:path": "AthenaAppsyncStack/bucket-ath-cache/Resource"
+      }
+    },
+    "bucketathspillB5E0B41D": {
+      "Type": "AWS::S3::Bucket",
+      "Properties": {
+        "BucketEncryption": {
+          "ServerSideEncryptionConfiguration": [
+            {
+              "ServerSideEncryptionByDefault": {
+                "SSEAlgorithm": "AES256"
+              }
+            }
+          ]
+        },
+        "PublicAccessBlockConfiguration": {
+          "BlockPublicAcls": true,
+          "BlockPublicPolicy": true,
+          "IgnorePublicAcls": true,
+          "RestrictPublicBuckets": true
+        }
+      },
+      "UpdateReplacePolicy": "Retain",
+      "DeletionPolicy": "Retain",
+      "Metadata": {
+        "aws:cdk:path": "AthenaAppsyncStack/bucket-ath-spill/Resource"
+      }
+    },
+    "athenawg": {
+      "Type": "AWS::Athena::WorkGroup",
+      "Properties": {
+        "Name": "tnc-wg",
+        "Description": "talkncloud demo for federated queries",
+        "WorkGroupConfiguration": {
+          "EnforceWorkGroupConfiguration": true,
+          "EngineVersion": {
+            "EffectiveEngineVersion": "Athena engine version 2",
+            "SelectedEngineVersion": "Athena engine version 2"
+          },
+          "ResultConfiguration": {
+            "OutputLocation": {
+              "Fn::Join": [
+                "",
+                [
+                  "s3://",
+                  {
+                    "Ref": "bucketathresults1366061F"
+                  },
+                  "/"
+                ]
+              ]
+            }
+          }
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "AthenaAppsyncStack/athena-wg"
+      }
+    },
+    "athenasource": {
+      "Type": "AWS::Athena::DataCatalog",
+      "Properties": {
+        "Name": "tnc-catalog",
+        "Type": "LAMBDA",
+        "Description": "catalog for talkncloud demo",
+        "Parameters": {
+          "function": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:aws:lambda:",
+                {
+                  "Ref": "AWS::Region"
+                },
+                ":",
+                {
+                  "Ref": "AWS::AccountId"
+                },
+                ":function:tnc-catalog"
+              ]
+            ]
+          }
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "AthenaAppsyncStack/athena-source"
+      }
+    },
+    "samconnector": {
+      "Type": "AWS::Serverless::Application",
+      "Properties": {
+        "Location": {
+          "ApplicationId": "arn:aws:serverlessrepo:us-east-1:292517598671:applications/AthenaDynamoDBConnector",
+          "SemanticVersion": "2021.14.1"
+        },
+        "Parameters": {
+          "AthenaCatalogName": "tnc-catalog",
+          "LambdaMemory": "3008",
+          "LambdaTimeout": "900",
+          "SpillBucket": {
+            "Ref": "bucketathspillB5E0B41D"
+          }
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "AthenaAppsyncStack/sam-connector"
+      }
+    },
+    "handlerathenaServiceRole501D752D": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com"
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition"
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+              ]
+            ]
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "AthenaAppsyncStack/handler-athena/ServiceRole/Resource"
+      }
+    },
+    "handlerathenaServiceRoleDefaultPolicy35878608": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "s3:GetObject*",
+                "s3:GetBucket*",
+                "s3:List*",
+                "s3:DeleteObject*",
+                "s3:PutObject",
+                "s3:Abort*"
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "bucketathresults1366061F",
+                    "Arn"
+                  ]
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "bucketathresults1366061F",
+                          "Arn"
+                        ]
+                      },
+                      "/*"
+                    ]
+                  ]
+                }
+              ]
+            },
+            {
+              "Action": [
+                "s3:GetObject*",
+                "s3:GetBucket*",
+                "s3:List*",
+                "s3:DeleteObject*",
+                "s3:PutObject",
+                "s3:Abort*"
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "bucketathspillB5E0B41D",
+                    "Arn"
+                  ]
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "bucketathspillB5E0B41D",
+                          "Arn"
+                        ]
+                      },
+                      "/*"
+                    ]
+                  ]
+                }
+              ]
+            },
+            {
+              "Action": [
+                "s3:GetObject*",
+                "s3:GetBucket*",
+                "s3:List*"
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "bucketathcache3F13894D",
+                    "Arn"
+                  ]
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "bucketathcache3F13894D",
+                          "Arn"
+                        ]
+                      },
+                      "/*"
+                    ]
+                  ]
+                }
+              ]
+            },
+            {
+              "Action": [
+                "athena:GetWorkGroup",
+                "athena:StartQueryExecution",
+                "athena:StopQueryExecution",
+                "athena:GetQueryExecution",
+                "athena:GetQueryResults",
+                "athena:GetDataCatalog"
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:athena:",
+                      {
+                        "Ref": "AWS::Region"
+                      },
+                      ":",
+                      {
+                        "Ref": "AWS::AccountId"
+                      },
+                      ":datacatalog/tnc-catalog"
+                    ]
+                  ]
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:athena:",
+                      {
+                        "Ref": "AWS::Region"
+                      },
+                      ":",
+                      {
+                        "Ref": "AWS::AccountId"
+                      },
+                      ":workgroup/tnc-wg"
+                    ]
+                  ]
+                }
+              ]
+            },
+            {
+              "Action": "athena:ListWorkGroups",
+              "Effect": "Allow",
+              "Resource": "*"
+            },
+            {
+              "Action": "lambda:InvokeFunction",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:lambda:",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId"
+                    },
+                    ":function:tnc-catalog"
+                  ]
+                ]
+              }
+            },
+            {
+              "Action": [
+                "s3:GetObject*",
+                "s3:GetBucket*",
+                "s3:List*",
+                "s3:DeleteObject*",
+                "s3:PutObject",
+                "s3:Abort*"
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "bucketathcache3F13894D",
+                    "Arn"
+                  ]
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "bucketathcache3F13894D",
+                          "Arn"
+                        ]
+                      },
+                      "/*"
+                    ]
+                  ]
+                }
+              ]
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "PolicyName": "handlerathenaServiceRoleDefaultPolicy35878608",
+        "Roles": [
+          {
+            "Ref": "handlerathenaServiceRole501D752D"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "AthenaAppsyncStack/handler-athena/ServiceRole/DefaultPolicy/Resource"
+      }
+    },
+    "handlerathenaD627B2D9": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Ref": "AssetParametersac2c0146023651106a75be7d039386f1bfdd52136e55a67975b252f26b25718dS3Bucket44A0716A"
+          },
+          "S3Key": {
+            "Fn::Join": [
+              "",
+              [
+                {
+                  "Fn::Select": [
+                    0,
+                    {
+                      "Fn::Split": [
+                        "||",
+                        {
+                          "Ref": "AssetParametersac2c0146023651106a75be7d039386f1bfdd52136e55a67975b252f26b25718dS3VersionKey132FB702"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "Fn::Select": [
+                    1,
+                    {
+                      "Fn::Split": [
+                        "||",
+                        {
+                          "Ref": "AssetParametersac2c0146023651106a75be7d039386f1bfdd52136e55a67975b252f26b25718dS3VersionKey132FB702"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            ]
+          }
+        },
+        "Role": {
+          "Fn::GetAtt": [
+            "handlerathenaServiceRole501D752D",
+            "Arn"
+          ]
+        },
+        "Description": "use athena to query federated sources",
+        "Environment": {
+          "Variables": {
+            "CACHE_BUCKET": {
+              "Ref": "bucketathcache3F13894D"
+            },
+            "CACHE_MINS": "3",
+            "ATH_BUCKET": {
+              "Ref": "bucketathresults1366061F"
+            },
+            "ATH_CAT": "tnc-catalog",
+            "ATH_WG": "tnc-wg",
+            "DYN_TABLE": {
+              "Ref": "tncdb38B2E622"
+            }
+          }
+        },
+        "FunctionName": "tnc-athena-handler",
+        "Handler": "athena.handler",
+        "Runtime": "nodejs12.x",
+        "Timeout": 15
+      },
+      "DependsOn": [
+        "handlerathenaServiceRoleDefaultPolicy35878608",
+        "handlerathenaServiceRole501D752D"
+      ],
+      "Metadata": {
+        "aws:cdk:path": "AthenaAppsyncStack/handler-athena/Resource",
+        "aws:asset:path": "asset.ac2c0146023651106a75be7d039386f1bfdd52136e55a67975b252f26b25718d",
+        "aws:asset:property": "Code"
+      }
+    },
+    "api": {
+      "Type": "AWS::AppSync::GraphQLApi",
+      "Properties": {
+        "AuthenticationType": "API_KEY",
+        "Name": "talkncloud"
+      },
+      "Metadata": {
+        "aws:cdk:path": "AthenaAppsyncStack/api"
+      }
+    },
+    "appsynckey": {
+      "Type": "AWS::AppSync::ApiKey",
+      "Properties": {
+        "ApiId": {
+          "Fn::GetAtt": [
+            "api",
+            "ApiId"
+          ]
+        },
+        "Description": "talkncloud temporary key for demo",
+        "Expires": 1622454295
+      },
+      "Metadata": {
+        "aws:cdk:path": "AthenaAppsyncStack/appsync-key"
+      }
+    },
+    "tncschema": {
+      "Type": "AWS::AppSync::GraphQLSchema",
+      "Properties": {
+        "ApiId": {
+          "Fn::GetAtt": [
+            "api",
+            "ApiId"
+          ]
+        },
+        "Definition": "type Query {\n  getAthena(param: String): String @function(name: \"tnc-athena-handler\")\n}"
+      },
+      "Metadata": {
+        "aws:cdk:path": "AthenaAppsyncStack/tnc-schema"
+      }
+    },
+    "tnclambdaRole35F4FD4A": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "appsync.amazonaws.com"
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "AthenaAppsyncStack/tnc-lambdaRole/Resource"
+      }
+    },
+    "tnclambdaRoleDefaultPolicy7A97C49C": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "lambda:InvokeFunction",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "handlerathenaD627B2D9",
+                  "Arn"
+                ]
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "PolicyName": "tnclambdaRoleDefaultPolicy7A97C49C",
+        "Roles": [
+          {
+            "Ref": "tnclambdaRole35F4FD4A"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "AthenaAppsyncStack/tnc-lambdaRole/DefaultPolicy/Resource"
+      }
+    },
+    "tnclambdasource": {
+      "Type": "AWS::AppSync::DataSource",
+      "Properties": {
+        "ApiId": {
+          "Fn::GetAtt": [
+            "api",
+            "ApiId"
+          ]
+        },
+        "Name": "lambda",
+        "Type": "AWS_LAMBDA",
+        "Description": "talkncloud lambda datasource",
+        "LambdaConfig": {
+          "LambdaFunctionArn": {
+            "Fn::GetAtt": [
+              "handlerathenaD627B2D9",
+              "Arn"
+            ]
+          }
+        },
+        "ServiceRoleArn": {
+          "Fn::GetAtt": [
+            "tnclambdaRole35F4FD4A",
+            "Arn"
+          ]
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "AthenaAppsyncStack/tnc-lambda-source"
+      }
+    },
+    "queryAthenaResolver": {
+      "Type": "AWS::AppSync::Resolver",
+      "Properties": {
+        "ApiId": {
+          "Fn::GetAtt": [
+            "api",
+            "ApiId"
+          ]
+        },
+        "FieldName": "getAthena",
+        "TypeName": "Query",
+        "DataSourceName": "lambda"
+      },
+      "DependsOn": [
+        "tnclambdasource"
+      ],
+      "Metadata": {
+        "aws:cdk:path": "AthenaAppsyncStack/queryAthenaResolver"
+      }
+    },
+    "CDKMetadata": {
+      "Type": "AWS::CDK::Metadata",
+      "Properties": {
+        "Analytics": "v2:deflate64:H4sIAAAAAAAAE0WQy07DMBBFv4W941J1AewIregCFiVBYj2xp4mb+CE/iiIr/47tUFhYc33Hx/PY0qcHen/3DN+uYnzcRKYt0th6YCNp0OlgGZK9Vs7bwDypnUOfsr1QPdmf1QksSPRo8+X//VklhAsvtFpI/jvyWYHUvKPxE7qpPCliIW5H40tgI/psripBfkAFNCbrS9vxaHUwOX8AD/t0Jt0nFCRNXm3MJBjkamQC2fHEvQbFipHyN70QkYDY6LV+iSed0LmMUlTup4I8paNlWALGuFmx0srRghk+3msjSKkr3rCwv37LBpRwa7P9W0ZezHRFuywLUZojvbjNdbujj2n1FydEZYPyQiJt1vgDZR+1JJYBAAA="
+      },
+      "Metadata": {
+        "aws:cdk:path": "AthenaAppsyncStack/CDKMetadata/Default"
+      },
+      "Condition": "CDKMetadataAvailable"
+    }
+  },
+  "Parameters": {
+    "AssetParametersac2c0146023651106a75be7d039386f1bfdd52136e55a67975b252f26b25718dS3Bucket44A0716A": {
+      "Type": "String",
+      "Description": "S3 bucket for asset \"ac2c0146023651106a75be7d039386f1bfdd52136e55a67975b252f26b25718d\""
+    },
+    "AssetParametersac2c0146023651106a75be7d039386f1bfdd52136e55a67975b252f26b25718dS3VersionKey132FB702": {
+      "Type": "String",
+      "Description": "S3 key for asset version \"ac2c0146023651106a75be7d039386f1bfdd52136e55a67975b252f26b25718d\""
+    },
+    "AssetParametersac2c0146023651106a75be7d039386f1bfdd52136e55a67975b252f26b25718dArtifactHashC8390232": {
+      "Type": "String",
+      "Description": "Artifact hash for asset \"ac2c0146023651106a75be7d039386f1bfdd52136e55a67975b252f26b25718d\""
+    }
+  },
+  "Conditions": {
+    "CDKMetadataAvailable": {
+      "Fn::Or": [
+        {
+          "Fn::Or": [
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "af-south-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "ap-east-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "ap-northeast-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "ap-northeast-2"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "ap-south-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "ap-southeast-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "ap-southeast-2"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "ca-central-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "cn-north-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "cn-northwest-1"
+              ]
+            }
+          ]
+        },
+        {
+          "Fn::Or": [
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "eu-central-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "eu-north-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "eu-south-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "eu-west-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "eu-west-2"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "eu-west-3"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "me-south-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "sa-east-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "us-east-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "us-east-2"
+              ]
+            }
+          ]
+        },
+        {
+          "Fn::Or": [
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "us-west-1"
+              ]
+            },
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "AWS::Region"
+                },
+                "us-west-2"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

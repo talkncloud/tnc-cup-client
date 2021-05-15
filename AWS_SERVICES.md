@@ -5,6 +5,7 @@
 | name | description | cloudformation key |
 |---|---|---|
 | AppSync | managed GraphQL API service | AWS::AppSync::GraphQLApi | 
+| Athena | Athena WorkGroups | AWS::Athena::WorkGroup | 
 | Cognito | user authentication and authorization such as oAuth | AWS::Cognito::UserPool | 
 | DynamoDB | NoSQL database service | AWS::DynamoDB::Table | 
 | EC2 | virtual servers (IaaS) | AWS::EC2::Instance | 
